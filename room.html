@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="vi" data-accent="green">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phòng học — StudyWithMe</title>
+  <meta name="description" content="Phòng học tập trung StudyWithMe: đồng hồ Pomodoro, mục tiêu, tài liệu ghim, chat nhóm và danh sách người đang học.">
+  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script>
+    (function () {
+      try {
+        var saved = JSON.parse(localStorage.getItem("studywithme.v1") || "{}");
+        var profile = saved.profile || {};
+        var root = document.documentElement;
+        root.dataset.theme = profile.theme === "dark" ? "dark" : "light";
+        root.dataset.accent = profile.accent || "green";
+      } catch (err) {
+        document.documentElement.dataset.theme = "light";
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/app.css">
+</head>
+<body class="app-body-page" data-page="room">
+  <div class="app">
+    <aside class="sidebar" id="appSidebar"></aside>
+
+    <div class="app-body">
+      <header class="topbar" id="topbar"></header>
+
+      <main class="page page--room">
+        <!-- Room header -------------------------------------------------- -->
+        <div class="room-top">
+          <a class="room-back" href="dashboard.html" aria-label="Quay lại sảnh chính"><span data-icon="arrow-left"></span></a>
+          <div class="room-title">
+            <h1 id="roomName">Đang tải phòng…</h1>
+            <div class="meta">
+              <span class="pill" id="roomTypePill"><span data-icon="globe"></span> <span>Cộng đồng</span></span>
+              <span id="roomSubjectMeta">Toán</span>
+              <span class="dot dot--live"></span>
+              <span id="roomCapacityMeta">14 / 20 chỗ</span>
+              <span>·</span>
+              <span id="roomTopicMeta">—</span>
+            </div>
+          </div>
+          <div class="room-top-actions">
+            <button class="btn btn-soft btn-sm members-toggle" id="membersToggle"><span data-icon="users"></span> Thành viên</button>
+            <button class="btn btn-soft btn-sm" id="inviteBtn"><span data-icon="link"></span> <span>Mời bạn</span></button>
+            <button class="btn btn-ghost btn-sm" id="leaveRoomBtn" type="button"><span data-icon="logout"></span> <span>Rời phòng</span></button>
+          </div>
+        </div>
+
+        <div class="mobile-room-tabs">
+          <button class="chip active" data-scroll="timerCard">Đồng hồ</button>
+          <button class="chip" data-scroll="membersCol">Thành viên</button>
+          <button class="chip" data-scroll="chatCard">Chat &amp; ghi chú</button>
+        </div>
+
+        <div class="room-grid">
+          <!-- Members ---------------------------------------------------- -->
+          <aside class="room-col room-col--members" id="membersCol">
+            <section class="panel">
+              <div class="panel-head">
+                <h2 class="dream-head"><span data-icon="star"></span>Những người đang thực hiện ước mơ của mình</h2>
+                <span class="hint" id="memberCount">14 / 20</span>
+              </div>
+              <div class="members-list" id="membersList"></div>
+              <div class="room-side-note">
+                <span data-icon="shield"></span>
+                Chỗ ngồi được cấp tự động, không trùng lặp. Rời phòng để nhường chỗ.
+              </div>
+            </section>
+
+            <section class="panel" id="invitePanel">
+              <div class="panel-head"><h2>Mời bạn cùng học</h2></div>
+              <div class="panel-body" style="padding:13px 14px">
+                <p style="font-size:11px;color:var(--text-3);line-height:1.6;margin-bottom:9px">
+                  Gửi link này cho bạn của bạn. Không cần tài khoản mới.
+                </p>
+                <div class="input-row">
+                  <input class="input" id="inviteLink" readonly style="height:34px;font-size:11px" aria-label="Link mời">
+                  <button class="btn btn-soft btn-sm" id="copyInvite" aria-label="Sao chép"><span data-icon="copy"></span></button>
+                </div>
+              </div>
+            </section>
+          </aside>
+
+          <!-- Main ------------------------------------------------------- -->
+          <div class="room-col room-col--main">
+            <section class="panel timer-card" id="timerCard">
+              <div class="timer-inner">
+                <div class="timer-head">
+                  <span class="status" id="timerStatus"><i></i> Sẵn sàng</span>
+                  <div class="seg" id="modeSeg">
+                    <button type="button" data-mode="countdown" class="active">Đếm ngược</button>
+                    <button type="button" data-mode="stopwatch">Đếm xuôi</button>
+                  </div>
+                </div>
+
+                <div class="ring-wrap">
+                  <svg class="ring" viewBox="0 0 240 240" aria-hidden="true">
+                    <circle class="ring-bg" cx="120" cy="120" r="108"></circle>
+                    <circle class="ring-fg" id="ringFg" cx="120" cy="120" r="108"></circle>
+                  </svg>
+                  <div class="ring-center">
+                    <span class="time" id="timerDisplay">25:00</span>
+                    <span class="mode-label" id="timerLabel">Ca tập trung 25 phút</span>
+                    <span class="done-label hidden" id="timerDone">Hoàn thành ca ✓</span>
+                  </div>
+                </div>
+
+                <div class="timer-presets" id="timerPresets">
+                  <button type="button" data-preset="25" class="active">25 / 5</button>
+                  <button type="button" data-preset="50">50 / 10</button>
+                  <button type="button" data-preset="90">90 / 20</button>
+                </div>
+
+                <div class="timer-controls">
+                  <button class="btn-timer" id="timerToggle"><span data-icon="play"></span> <span>Bắt đầu</span></button>
+                  <button class="btn-icon" id="timerReset" aria-label="Đặt lại đồng hồ"><span data-icon="rotate"></span></button>
+                </div>
+
+                <div class="timer-foot">
+                  <span class="tf"><span data-icon="clock"></span> Hôm nay <b id="todayFocus">0p</b></span>
+                  <span class="tf"><span data-icon="star"></span> Sao <b id="todayStars">+0</b></span>
+                  <span class="tf"><span data-icon="flame"></span> Chuỗi <b id="roomStreak">0 ngày</b></span>
+                </div>
+
+                <div class="heartbeat" id="heartbeat">
+                  <span data-icon="activity"></span>
+                  <span>Heartbeat xác thực tương tác</span>
+                  <b id="hbTimer">15:00</b>
+                  <button class="btn btn-soft" id="hbConfirm" type="button">Tôi vẫn đang học</button>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head">
+                <h2>Mục tiêu buổi học</h2>
+                <a href="planner.html" class="hint">Mở kế hoạch <span data-icon="arrow-up-right"></span></a>
+              </div>
+              <div class="goals-list" id="goalsList"></div>
+              <form class="goal-add" id="goalForm">
+                <input class="input" id="goalInput" maxlength="80" placeholder="Thêm việc cho buổi học…" aria-label="Việc mới">
+                <button class="btn btn-soft" type="submit"><span data-icon="plus"></span> Thêm</button>
+              </form>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head">
+                <h2>Bảng ghim tài liệu</h2>
+                <button class="hint" id="addDocBtn" type="button" style="display:inline-flex;align-items:center;gap:4px">
+                  <span data-icon="plus"></span> Ghim tài liệu
+                </button>
+              </div>
+              <div class="doc-list" id="docList"></div>
+            </section>
+          </div>
+
+          <!-- Chat ------------------------------------------------------- -->
+          <aside class="room-col room-col--chat room-col--sticky" id="chatCol">
+            <section class="panel chat-card" id="chatCard">
+              <div class="chat-head">
+                <span class="dot dot--live"></span>
+                <b id="chatTitle">Chat nhóm</b>
+                <div class="seg" id="chatSeg">
+                  <button type="button" data-pane="chat" class="active">Chat</button>
+                  <button type="button" data-pane="note">Sổ nháp</button>
+                </div>
+              </div>
+
+              <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
+
+              <div class="notebook hidden" id="notebookPane">
+                <textarea id="notebookArea" placeholder="Ghi lại công thức, lỗi sai, ý cần hỏi…&#10;Sổ nháp tự lưu theo từng phòng." aria-label="Sổ nháp"></textarea>
+                <div class="notebook-foot">
+                  <span id="noteCount">0 từ</span>
+                  <span class="saved" id="noteSaved"><span data-icon="check"></span> Đã lưu</span>
+                </div>
+              </div>
+
+              <form class="chat-input" id="chatForm">
+                <div class="chat-input-row">
+                  <input class="input" id="chatInput" maxlength="240" placeholder="Nhắn gì đó cho nhóm…" autocomplete="off" aria-label="Tin nhắn">
+                  <button class="send" type="submit" aria-label="Gửi"><span data-icon="send"></span></button>
+                </div>
+                <div class="chat-hint"><span data-icon="shield"></span> Chống spam 1 tin/giây · Tin nhắn được lưu theo phòng</div>
+              </form>
+            </section>
+          </aside>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Add document modal -------------------------------------------------- -->
+  <div class="modal" id="docModal" aria-hidden="true">
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="docTitle">
+      <div class="modal-head">
+        <div>
+          <h2 class="modal-title" id="docTitle">Ghim tài liệu</h2>
+          <p class="modal-sub">Chủ phòng có thể ghim đề thi, công thức hoặc checklist cho cả nhóm.</p>
+        </div>
+        <button class="modal-close" data-close aria-label="Đóng"><span data-icon="x"></span></button>
+      </div>
+      <form class="modal-body" id="docForm">
+        <div class="field">
+          <label for="docName">Tên tài liệu</label>
+          <input class="input" id="docName" maxlength="80" placeholder="VD: Đề minh họa Toán 2026">
+        </div>
+        <div class="field">
+          <label for="docMeta">Mô tả ngắn</label>
+          <input class="input" id="docMeta" maxlength="60" placeholder="PDF · 2.4 MB">
+        </div>
+        <div class="field">
+          <label for="docFile">Tệp từ máy hoặc điện thoại</label>
+          <input class="input" id="docFile" type="file"
+                 accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv,.txt,.zip,.png,.jpg,.jpeg,.webp,.gif">
+          <p class="field-hint">Tối đa 10 MB. PDF, tài liệu Office, ảnh, TXT và ZIP.</p>
+        </div>
+        <div class="field">
+          <label for="docUrl">Liên kết (không bắt buộc)</label>
+          <input class="input" id="docUrl" type="url" maxlength="400" placeholder="https://…">
+        </div>
+        <p class="field-hint">Tài liệu được lưu theo phòng. Thêm liên kết http(s) để cả nhóm mở trực tiếp.</p>
+      </form>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" data-close>Huỷ</button>
+        <button class="btn btn-accent" type="submit" form="docForm">Ghim lên bảng</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/api/bootstrap.js"></script>
+  <script src="assets/js/data.js" defer></script>
+  <script src="assets/js/ui.js" defer></script>
+  <script src="assets/js/shell.js" defer></script>
+  <script src="assets/js/room.js" defer></script>
+</body>
+</html>

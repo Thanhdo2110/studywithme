@@ -1,0 +1,10 @@
+New guest theme=light
+Created custom room subject=custom:Sinh học
+Card subject=Sinh học
+Profile grade stored=11
+Profile exam stored=Kỳ thi THPT thử nghiệm
+Chat sent=PASS
+Goal added=PASS
+Timer 25:00 -> 24:58=PASS
+Dissolve redirected to dashboard=PASS
+Last-room retest: sidebar href room_mwlo51wb_b067da and reopened room name Phòng học Lập trình=PASS

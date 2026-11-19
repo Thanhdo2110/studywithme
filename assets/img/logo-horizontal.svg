@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 96" role="img" aria-label="StudyWithMe — Học cùng nhau">
+  <title>StudyWithMe — Học cùng nhau</title>
+
+  <!-- Mark: dải bookmark = kim đồng hồ 12 giờ -->
+    <g>
+    <circle cx="48" cy="48" r="36.5" fill="none" stroke="currentColor" stroke-width="6.5"/>
+    <path d="M37.5 12 37.5 57Q37.5 60.5 40.2 58.6L48 48.5 55.8 58.6Q58.5 60.5 58.5 57L58.5 12Z" fill="currentColor"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="112" y="43" fill="currentColor"
+        font-family="Instrument Sans, Segoe UI, Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="32" font-weight="600" letter-spacing="0.5">StudyWithMe</text>
+  <text x="113" y="66" fill="currentColor" fill-opacity=".62"
+        font-family="Instrument Sans, Segoe UI, Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="10" font-weight="600" letter-spacing="3.9">HỌC CÙNG NHAU</text>
+  <path d="M113 77h52" stroke="currentColor" stroke-opacity=".3" stroke-width="1.6" stroke-linecap="round"/>
+</svg>

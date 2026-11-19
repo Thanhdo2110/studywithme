@@ -1,0 +1,3 @@
+Invalid registration payload: 400
+Unknown room without authentication: 401
+Health: 200

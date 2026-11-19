@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="vi" data-accent="green">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyWithMe — Học cùng nhau hơn</title>
+  <meta name="description" content="Nền tảng học tập trực tuyến dành cho học sinh THPT: phòng học tập trung theo thời gian thực, kế hoạch học theo môn, đồng hồ Pomodoro và heatmap thói quen. Không webcam, không xao nhãng.">
+  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script>
+    (function () {
+      try {
+        var saved = JSON.parse(localStorage.getItem("studywithme.v1") || "{}");
+        var profile = saved.profile || {};
+        var root = document.documentElement;
+        root.dataset.theme = profile.theme === "dark" ? "dark" : "light";
+        root.dataset.accent = profile.accent || "green";
+      } catch (err) {
+        document.documentElement.dataset.theme = "light";
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/landing.css">
+</head>
+<body class="landing">
+  <a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html" aria-label="StudyWithMe — trang chủ">
+        <img class="brand-logo" src="assets/img/logo-horizontal.svg" alt="StudyWithMe — Học cùng nhau">
+      </a>
+
+      <nav class="site-nav" aria-label="Điều hướng chính">
+        <a href="#modes">Chế độ phòng</a>
+        <a href="#features">Tính năng</a>
+        <a href="#how">Cách hoạt động</a>
+        <a href="#data">Dữ liệu</a>
+        <a href="#faq">FAQ</a>
+        <a href="dashboard.html">Sảnh chính <span data-icon="arrow-up-right"></span></a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="#" class="btn btn-ghost" data-open-auth>Đăng nhập</a>
+        <a href="dashboard.html" class="btn btn-primary">Học ngay</a>
+        <button class="nav-toggle" id="navToggle" aria-label="Mở menu" aria-expanded="false">
+          <span data-icon="menu"></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="mobile-nav" id="mobileNav">
+      <a href="#modes">Chế độ phòng <span data-icon="chevron-right"></span></a>
+      <a href="#features">Tính năng <span data-icon="chevron-right"></span></a>
+      <a href="#how">Cách hoạt động <span data-icon="chevron-right"></span></a>
+      <a href="#data">Dữ liệu học tập <span data-icon="chevron-right"></span></a>
+      <a href="#faq">Câu hỏi thường gặp <span data-icon="chevron-right"></span></a>
+      <a href="dashboard.html">Vào sảnh chính <span data-icon="arrow-right"></span></a>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ================================================================== -->
+    <!-- HERO                                                               -->
+    <!-- ================================================================== -->
+    <section class="hero">
+      <div class="hero-bg" aria-hidden="true"></div>
+      <div class="hero-glow" aria-hidden="true"></div>
+
+      <div class="container hero-inner">
+        <div class="hero-badge reveal">
+          <span class="dot dot--live"></span>
+          <span>Nền tảng học tập cho học sinh THPT</span>
+          <span class="tag-new">2026</span>
+        </div>
+
+        <h1 class="hero-title reveal" style="--d:60ms">
+          Học cùng nhau.
+          <span class="line-2">Tập trung <em>sâu hơn</em>.</span>
+        </h1>
+
+        <p class="hero-sub reveal" style="--d:120ms">
+          Một không gian duy nhất cho phòng học tập trung thời gian thực, kế hoạch học theo môn
+          và thống kê thói quen. <strong>Không webcam, không ồn ào, không xao nhãng</strong> —
+          chỉ có bạn và những người đang cùng tiến.
+        </p>
+
+        <div class="hero-actions reveal" style="--d:180ms">
+          <a class="btn btn-primary btn-lg" href="dashboard.html">
+            Bắt đầu học ngay <span data-icon="arrow-right"></span>
+          </a>
+          <a class="btn btn-outline btn-lg" href="#modes">Khám phá phòng học</a>
+        </div>
+
+        <div class="hero-micro reveal" style="--d:230ms">
+          <span><span data-icon="check"></span> Miễn phí, không cần thẻ</span>
+          <span><span data-icon="check"></span> Vào phòng trong 15 giây</span>
+          <span><span data-icon="check"></span> Chạy tốt trên mọi thiết bị</span>
+        </div>
+      </div>
+
+      <!-- App preview -->
+      <div class="hero-window-wrap reveal" style="--d:280ms">
+        <div class="hero-window" role="img" aria-label="Giao diện StudyWithMe: đồng hồ tập trung, danh sách phòng học, heatmap và chat nhóm">
+          <div class="hw-bar">
+            <div class="hw-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+            <div class="hw-url"><span><span data-icon="lock"></span> studywithme.app/sanh-chinh</span></div>
+            <span class="hw-live"><i></i> 128 đang học</span>
+          </div>
+
+          <div class="hw-body">
+            <aside class="hw-side">
+              <div class="hw-brand">
+                <img class="brand-logo-mark" src="assets/img/logo-mini.svg" alt="">
+                <span>StudyWithMe</span>
+              </div>
+              <span class="hw-label">Không gian học</span>
+              <div class="hw-item active"><span data-icon="home"></span> Sảnh chính</div>
+              <div class="hw-item"><span data-icon="calendar"></span> Kế hoạch học</div>
+              <div class="hw-item"><span data-icon="chart"></span> Thống kê</div>
+              <div class="hw-item"><span data-icon="users"></span> Phòng học <span class="count">12</span></div>
+              <span class="hw-label">Cộng đồng</span>
+              <div class="hw-item"><span data-icon="globe"></span> Phòng cộng đồng</div>
+              <div class="hw-item"><span data-icon="sparkles"></span> Cửa hàng Sao</div>
+              <div class="hw-dday">
+                <b>D-57</b>
+                <span>THPT Quốc gia<br>ĐH Bách Khoa Hà Nội</span>
+                <div class="bar"><span style="width:84%"></span></div>
+              </div>
+            </aside>
+
+            <div class="hw-main">
+              <div class="hw-greet">
+                <div>
+                  <h4>Chào buổi tối, Đô 👋</h4>
+                  <p>Hôm nay bạn đã tập trung 2h 35p</p>
+                </div>
+                <span class="pill pill--accent"><span class="dot"></span> 3 phòng đang mở</span>
+              </div>
+
+              <div class="hw-cards">
+                <div class="hw-card">
+                  <div class="hw-card-title"><span>Đồng hồ tập trung</span><span data-icon="timer"></span></div>
+                  <div class="hw-timer">
+                    <div class="hw-ring"><span>25:00</span></div>
+                    <div class="hw-timer-meta">
+                      <b>Toán · Hàm số</b>
+                      <span>Ca 25 / nghỉ 5</span>
+                      <span class="mini-btn"><span data-icon="play"></span> Tiếp tục</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="hw-card">
+                  <div class="hw-card-title"><span>Phòng đang mở</span><span data-icon="users"></span></div>
+                  <div class="hw-roomlist">
+                    <div class="hw-room-row">
+                      <i class="rd" style="background:#6ad86c"></i>
+                      <span class="nm">Ôn Toán 12 · Hàm số</span>
+                      <span class="ct">14/20</span>
+                    </div>
+                    <div class="hw-room-row">
+                      <i class="rd" style="background:#7aa2f7"></i>
+                      <span class="nm">Vật lý · Sóng cơ</span>
+                      <span class="ct">19/20</span>
+                    </div>
+                    <div class="hw-room-row">
+                      <i class="rd" style="background:#e39ad4"></i>
+                      <span class="nm">Hóa hữu cơ cấp tốc</span>
+                      <span class="ct">8/20</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="hw-card hw-heat">
+                  <div class="hw-card-title"><span>Chuỗi học 12 ngày</span><span data-icon="flame"></span></div>
+                  <div class="grid" data-heat-mini aria-hidden="true"></div>
+                  <div class="foot"><span>Tháng 11</span><span><b>28h 40p</b> tuần này</span></div>
+                </div>
+              </div>
+            </div>
+
+            <aside class="hw-chat">
+              <div class="hw-chat-head">
+                <b>Chat nhóm</b>
+                <span>● LIVE</span>
+              </div>
+              <div class="hw-msgs">
+                <div class="hw-msg">
+                  <span class="avatar">🌙</span>
+                  <div>
+                    <div class="who">Minh Anh</div>
+                    <div class="txt">Bắt đầu ca 50/10 nhé mọi người 🔥</div>
+                  </div>
+                </div>
+                <div class="hw-msg">
+                  <span class="avatar">🐧</span>
+                  <div>
+                    <div class="who">Bảo Nam</div>
+                    <div class="txt">Ok, mình đang mở đề Toán.</div>
+                  </div>
+                </div>
+                <div class="hw-msg me">
+                  <span class="avatar">🦊</span>
+                  <div>
+                    <div class="who">Bạn</div>
+                    <div class="txt">Vào rồi, bật đồng hồ thôi!</div>
+                  </div>
+                </div>
+                <div class="hw-msg">
+                  <span class="avatar">🌿</span>
+                  <div>
+                    <div class="who">Khánh Linh</div>
+                    <div class="txt">Cho mình xin link đề với.</div>
+                  </div>
+                </div>
+              </div>
+              <div class="hw-chat-input">
+                Nhắn gì đó cho nhóm…
+                <span data-icon="send"></span>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-strip">
+        <div class="container">
+          <div class="inner">
+            <div class="strip-cell">
+              <b>12.480<em>+</em></b>
+              <span>học sinh đang học mỗi tuần</span>
+            </div>
+            <div class="strip-cell">
+              <b>38.920<em>h</em></b>
+              <span>thời gian tập trung được ghi nhận</span>
+            </div>
+            <div class="strip-cell">
+              <b>1.240</b>
+              <span>phòng học cộng đồng &amp; nhóm</span>
+            </div>
+            <div class="strip-cell">
+              <b>0<em> webcam</em></b>
+              <span>không camera, không micro</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- MODES                                                              -->
+    <!-- ================================================================== -->
+    <section class="section" id="modes">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2 class="section-title">Một không gian. Ba cách học.</h2>
+          <p class="section-sub">
+            Cùng một bộ công cụ cho mọi phòng: đồng hồ tập trung, to-do theo môn, bảng ghim tài liệu
+            và thống kê. Khác nhau ở quyền truy cập và số người cùng bàn.
+          </p>
+        </div>
+
+        <div class="modes-tabs reveal" role="tablist" aria-label="Chọn chế độ phòng">
+          <button class="active" role="tab" aria-selected="true" data-mode="community">
+            <span data-icon="globe"></span><span>Cộng đồng</span>
+          </button>
+          <button role="tab" aria-selected="false" data-mode="group">
+            <span data-icon="lock"></span><span>Nhóm bạn</span>
+          </button>
+          <button role="tab" aria-selected="false" data-mode="solo">
+            <span data-icon="user"></span><span>Cá nhân</span>
+          </button>
+        </div>
+
+        <!-- Cộng đồng -->
+        <div class="mode-panel active" id="mode-community" role="tabpanel">
+          <div class="mode-grid">
+            <div class="mode-copy">
+              <span class="pill pill--accent">Tối đa 20 người</span>
+              <h3>Phòng Cộng đồng</h3>
+              <p>
+                Mở cửa cho mọi học sinh cùng mục tiêu. Bạn bước vào, chọn một chỗ ngồi còn trống
+                và bắt đầu ca học của mình trong im lặng — vẫn cảm nhận được mọi người xung quanh.
+              </p>
+              <ul class="mode-list">
+                <li><span data-icon="check-circle"></span> Hiển thị ở Sảnh chính, lọc theo môn &amp; chủ đề ôn thi</li>
+                <li><span data-icon="check-circle"></span> Tự động cấp chỗ ngồi duy nhất, không trùng lặp</li>
+                <li><span data-icon="check-circle"></span> Chat nhóm, bảng ghim đề thi và đồng hồ chung</li>
+              </ul>
+              <div class="mode-actions">
+                <a class="btn btn-primary btn-sm" href="dashboard.html">Xem phòng đang mở <span data-icon="arrow-right"></span></a>
+                <a class="btn btn-ghost btn-sm" href="room.html">Vào một phòng mẫu</a>
+              </div>
+            </div>
+
+            <div class="mode-visual">
+              <div class="mv-room-card">
+                <div class="mv-top">
+                  <span class="avatar">🌙</span>
+                  <div>
+                    <h5>Ôn Toán 12 · Chuyên đề Hàm số</h5>
+                    <p>Chủ phòng: Minh Anh · 19:00 – 21:30</p>
+                  </div>
+                  <span class="tag">14/20</span>
+                </div>
+                <div class="mv-people">
+                  <div class="mv-person">
+                    <span class="avatar">🌙</span><b>Minh Anh</b>
+                    <span class="status"><i></i> Đang học</span><span>#03</span>
+                  </div>
+                  <div class="mv-person">
+                    <span class="avatar">🐧</span><b>Bảo Nam</b>
+                    <span class="status"><i></i> Đang học</span><span>#07</span>
+                  </div>
+                  <div class="mv-person">
+                    <span class="avatar">🌿</span><b>Khánh Linh</b>
+                    <span class="status rest"><i></i> Nghỉ 5p</span><span>#11</span>
+                  </div>
+                </div>
+                <div class="mv-foot">
+                  <span>Chỗ ngồi</span>
+                  <div class="bar"><span style="width:70%"></span></div>
+                  <span>14 / 20</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Nhóm bạn -->
+        <div class="mode-panel" id="mode-group" role="tabpanel">
+          <div class="mode-grid">
+            <div class="mode-copy">
+              <span class="pill pill--accent">Tối đa 8 người</span>
+              <h3>Phòng Nhóm bạn</h3>
+              <p>
+                Một đường link riêng cho nhóm thân. Không xuất hiện ở Sảnh chính, không người lạ,
+                chỉ những người bạn thực sự muốn học cùng.
+              </p>
+              <ul class="mode-list">
+                <li><span data-icon="check-circle"></span> Tạo phòng và chia sẻ link mời trong 1 chạm</li>
+                <li><span data-icon="check-circle"></span> Chat nhóm riêng, ghim tài liệu chung</li>
+                <li><span data-icon="check-circle"></span> Cùng mục tiêu, cùng nhịp nghỉ giữa các ca</li>
+              </ul>
+              <div class="mode-actions">
+                <a class="btn btn-primary btn-sm" href="dashboard.html">Tạo phòng nhóm <span data-icon="plus"></span></a>
+                <a class="btn btn-ghost btn-sm" href="room.html?type=group">Xem phòng nhóm</a>
+              </div>
+            </div>
+
+            <div class="mode-visual">
+              <div class="mv-room-card">
+                <div class="mv-top">
+                  <span class="avatar">🌸</span>
+                  <div>
+                    <h5>Writing Task 2 · Nhóm 4 người</h5>
+                    <p>Chủ phòng: Ngọc Mai · Riêng tư</p>
+                  </div>
+                  <span class="tag">🔒 Nhóm</span>
+                </div>
+                <div class="mv-people">
+                  <div class="mv-person">
+                    <span class="avatar">🌸</span><b>Ngọc Mai</b>
+                    <span class="status"><i></i> Đang học</span><span>#01</span>
+                  </div>
+                  <div class="mv-person">
+                    <span class="avatar">🍊</span><b>Thu Trang</b>
+                    <span class="status"><i></i> Đang học</span><span>#02</span>
+                  </div>
+                  <div class="mv-person">
+                    <span class="avatar">🐯</span><b>Hoàng Long</b>
+                    <span class="status"><i></i> Đang học</span><span>#04</span>
+                  </div>
+                </div>
+                <div class="mv-foot">
+                  <span>studywithme.app/r/write-2</span>
+                  <span class="pill pill--mono" style="height:22px">Copy link</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cá nhân -->
+        <div class="mode-panel" id="mode-solo" role="tabpanel">
+          <div class="mode-grid">
+            <div class="mode-copy">
+              <span class="pill pill--accent">1 người</span>
+              <h3>Phòng Cá nhân</h3>
+              <p>
+                Khi bạn cần yên tĩnh tuyệt đối. Phòng chạy hoàn toàn trên máy, không mở kết nối
+                thời gian thực — và khung chat tự biến thành sổ nháp ghi chú nhanh.
+              </p>
+              <ul class="mode-list">
+                <li><span data-icon="check-circle"></span> Không kết nối WebSocket, tiết kiệm tài nguyên</li>
+                <li><span data-icon="check-circle"></span> Sổ nháp tự lưu theo từng phiên học</li>
+                <li><span data-icon="check-circle"></span> Dữ liệu vẫn tổng hợp vào Heatmap &amp; Study Stars</li>
+              </ul>
+              <div class="mode-actions">
+                <a class="btn btn-primary btn-sm" href="room.html?type=solo">Mở phòng cá nhân <span data-icon="arrow-right"></span></a>
+                <a class="btn btn-ghost btn-sm" href="planner.html">Lên kế hoạch trước</a>
+              </div>
+            </div>
+
+            <div class="mode-visual">
+              <div class="mv-note">
+                <div class="note-head">
+                  <b>Sổ nháp · Hôm nay</b>
+                  <span>Tự động lưu · 19:42</span>
+                </div>
+                <p>• Ôn lại công thức tính nhanh cực trị hàm bậc 3.</p>
+                <p>• Câu 34 đề minh họa: sai dấu khi xét dấu y'.</p>
+                <p>• Tối mai dành 30p chữa lại phần tương giao đồ thị.<span class="caret"></span></p>
+              </div>
+              <div class="mv-room-card">
+                <div class="mv-top">
+                  <span class="avatar">🦊</span>
+                  <div>
+                    <h5>Phòng của Đô</h5>
+                    <p>Chế độ cá nhân · Không ai làm phiền</p>
+                  </div>
+                  <span class="tag">● 25:00</span>
+                </div>
+                <div class="mv-foot">
+                  <span>Hôm nay</span>
+                  <div class="bar"><span style="width:62%"></span></div>
+                  <span>2h 35p</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- FEATURES                                                           -->
+    <!-- ================================================================== -->
+    <section class="section section--tight" id="features">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2 class="section-title">Mọi thứ cho một buổi học, không thừa một chi tiết.</h2>
+          <p class="section-sub">
+            Bạn không cần mở thêm năm ứng dụng khác nhau. Lịch học, đồng hồ, ghi chú, tài liệu và
+            thống kê đều nằm trong cùng một màn hình.
+          </p>
+        </div>
+
+        <div class="features-grid">
+          <article class="feature-card reveal">
+            <div class="feature-icon"><span data-icon="calendar"></span></div>
+            <h3>Timeline học theo môn</h3>
+            <p>Time-blocking cho Toán, Lý, Hóa, Anh, ĐGNL… Kéo một khối là có một ca học, kèm ghi chú và mục tiêu riêng.</p>
+            <div class="feature-meta"><span class="dot"></span> Time-blocking <span class="dot"></span> Theo tuần</div>
+          </article>
+
+          <article class="feature-card reveal" style="--d:50ms">
+            <div class="feature-icon"><span data-icon="timer"></span></div>
+            <h3>Đồng hồ tập trung</h3>
+            <p>Pomodoro 25/5, ca dài 50/10 hoặc đếm xuôi tự do. Mọi phút học đều được ghi vào nhật ký khi bạn thực sự tương tác.</p>
+            <div class="feature-meta"><span class="dot"></span> Pomodoro <span class="dot"></span> Heartbeat 15p</div>
+          </article>
+
+          <article class="feature-card reveal" style="--d:100ms">
+            <div class="feature-icon"><span data-icon="chart"></span></div>
+            <h3>Heatmap thói quen</h3>
+            <p>Nhìn một năm học như một tấm bản đồ. Chuỗi ngày liên tiếp, giờ trung bình và môn nào đang bị bỏ quên.</p>
+            <div class="feature-meta"><span class="dot"></span> Tuần / tháng / quý</div>
+          </article>
+
+          <article class="feature-card reveal" style="--d:150ms">
+            <div class="feature-icon"><span data-icon="message"></span></div>
+            <h3>Chat nhóm &amp; Sổ nháp</h3>
+            <p>Phòng Cộng đồng và Nhóm có chat thời gian thực. Phòng Cá nhân tự chuyển thành sổ nháp ghi chú nhanh, lưu ngay trên máy.</p>
+            <div class="feature-meta"><span class="dot"></span> Real-time <span class="dot"></span> 1 tin / giây</div>
+          </article>
+
+          <article class="feature-card reveal" style="--d:200ms">
+            <div class="feature-icon"><span data-icon="pin"></span></div>
+            <h3>Bảng ghim tài liệu</h3>
+            <p>Chủ phòng ghim đề thi, công thức, checklist ôn tập để cả nhóm mở đúng thứ cần mở, không lạc link.</p>
+            <div class="feature-meta"><span class="dot"></span> Đề thi <span class="dot"></span> Tài liệu</div>
+          </article>
+
+          <article class="feature-card reveal" style="--d:250ms">
+            <div class="feature-icon"><span data-icon="sparkles"></span></div>
+            <h3>Study Stars &amp; thành tích</h3>
+            <p>Mỗi phút tập trung đổi thành Sao để mở khoá avatar, thú cưng. Hết buổi có phiếu thành tích để chia sẻ.</p>
+            <div class="feature-meta"><span class="dot"></span> Gamification</div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- DATA / CODE                                                        -->
+    <!-- ================================================================== -->
+    <section class="section section--tight" id="data">
+      <div class="container">
+        <div class="data-split">
+          <div class="data-copy reveal">
+            <h2>Mỗi phút học đều có căn cứ.</h2>
+            <p>
+              StudyWithMe không đoán bạn đã học bao lâu. Hệ thống ghi nhận phiên học theo từng ca,
+              xác thực tương tác định kỳ và chỉ cộng Sao khi phiên thực sự hợp lệ.
+            </p>
+            <ul class="data-points">
+              <li>
+                <span class="pi" data-icon="shield"></span>
+                <div>
+                  <b>Heartbeat chống gian lận</b>
+                  <span>Cứ 15 phút hệ thống kiểm tra tương tác. Tab treo hoặc bỏ đi quá lâu sẽ tạm dừng cộng giờ.</span>
+                </div>
+              </li>
+              <li>
+                <span class="pi" data-icon="chart"></span>
+                <div>
+                  <b>Tổng hợp theo tuần / tháng / quý</b>
+                  <span>Không chỉ là con số đẹp. Bạn thấy rõ môn nào đang chiếm thời gian và ngày nào mình bỏ nhịp.</span>
+                </div>
+              </li>
+              <li>
+                <span class="pi" data-icon="lock"></span>
+                <div>
+                  <b>Không thu thập hình ảnh, giọng nói</b>
+                  <span>Không webcam, không micro. Quyền riêng tư là mặc định, không phải một tuỳ chọn ẩn.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div class="reveal" style="--d:80ms">
+            <div class="code-window">
+              <div class="code-bar">
+                <span class="file"><i></i> study-session.json</span>
+                <span class="badge">HEARTBEAT OK</span>
+              </div>
+              <div class="code-body" aria-label="Ví dụ dữ liệu một phiên học">
+<span class="ln">01</span>{<br>
+<span class="ln">02</span>&nbsp;&nbsp;<span class="tok-prop">"user_id"</span>: <span class="tok-str">"guest_8f21"</span>,<br>
+<span class="ln">03</span>&nbsp;&nbsp;<span class="tok-prop">"room_id"</span>: <span class="tok-str">"toan-12-ham-so"</span>,<br>
+<span class="ln">04</span>&nbsp;&nbsp;<span class="tok-prop">"room_type"</span>: <span class="tok-str">"COMMUNITY"</span>,<br>
+<span class="ln">05</span>&nbsp;&nbsp;<span class="tok-prop">"subject"</span>: <span class="tok-str">"toan"</span>,<br>
+<span class="ln">06</span>&nbsp;&nbsp;<span class="tok-prop">"seat_index"</span>: <span class="tok-num">12</span>,<br>
+<span class="ln">07</span>&nbsp;&nbsp;<span class="tok-prop">"started_at"</span>: <span class="tok-str">"2026-11-17T19:00:00+07:00"</span>,<br>
+<span class="ln">08</span>&nbsp;&nbsp;<span class="tok-prop">"duration_minutes"</span>: <span class="tok-num">155</span>,<br>
+<span class="ln">09</span>&nbsp;&nbsp;<span class="tok-prop">"heartbeat"</span>: {<br>
+<span class="ln">10</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="tok-prop">"interval_min"</span>: <span class="tok-num">15</span>,<br>
+<span class="ln">11</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="tok-prop">"verified"</span>: <span class="tok-bool">true</span><br>
+<span class="ln">12</span>&nbsp;&nbsp;},<br>
+<span class="ln">13</span>&nbsp;&nbsp;<span class="tok-prop">"stars_earned"</span>: <span class="tok-num">155</span>,<br>
+<span class="ln">14</span>&nbsp;&nbsp;<span class="tok-prop">"status"</span>: <span class="tok-str">"completed"</span><br>
+<span class="ln">15</span>}
+              </div>
+              <div class="code-foot">
+                <span class="ok"><span data-icon="check-circle"></span> POST /v1/study-logs · 201 Created</span>
+                <span>0 webcam · 0 audio · 100% chủ động</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- HOW IT WORKS                                                       -->
+    <!-- ================================================================== -->
+    <section class="section section--tight" id="how">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2 class="section-title">Ba bước để có một buổi học tử tế.</h2>
+          <p class="section-sub">Không form đăng ký dài dòng. Không cần cài app. Từ trang chủ tới lúc ngồi vào bàn học dưới 15 giây.</p>
+        </div>
+
+        <div class="steps">
+          <article class="step-card reveal">
+            <span class="step-num">01 / CHUẨN BỊ</span>
+            <span class="step-ico" data-icon="target"></span>
+            <h3>Chọn mục tiêu hôm nay</h3>
+            <p>Đặt khối lớp, kỳ thi và ngày đếm ngược. Thêm 2–3 đầu việc theo môn — đủ cụ thể để bắt tay vào làm.</p>
+          </article>
+          <article class="step-card reveal" style="--d:70ms">
+            <span class="step-num">02 / TẬP TRUNG</span>
+            <span class="step-ico" data-icon="timer"></span>
+            <h3>Vào phòng và bấm giờ</h3>
+            <p>Chọn phòng Cộng đồng, Nhóm bạn hoặc Cá nhân. Nhận chỗ ngồi, bật ca học và để đồng hồ lo phần còn lại.</p>
+          </article>
+          <article class="step-card reveal" style="--d:140ms">
+            <span class="step-num">03 / NHÌN LẠI</span>
+            <span class="step-ico" data-icon="chart"></span>
+            <h3>Xem lại &amp; giữ nhịp</h3>
+            <p>Cuối ngày, Heatmap và phiếu thành tích cho bạn thấy điều gì hiệu quả — và điều gì cần đổi cho ngày mai.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- QUOTES                                                             -->
+    <!-- ================================================================== -->
+    <section class="section section--tight">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2 class="section-title">Không hoa mỹ. Chỉ là ngồi xuống và học.</h2>
+        </div>
+
+        <div class="quotes-grid">
+          <article class="quote-card reveal">
+            <div class="quote-stars" aria-label="5 trên 5">★★★★★</div>
+            <blockquote>
+              “Trước đây mình mở Discord để học một mình rồi lạc vào meme lúc nào không biết.
+              Giờ vào phòng 50/10, <strong>thấy mọi người vẫn cặm cụi</strong> nên mình cũng ngồi lại.”
+            </blockquote>
+            <div class="quote-person">
+              <span class="avatar avatar--a">NA</span>
+              <div>
+                <b>Ngọc Anh</b>
+                <span>Lớp 12 · Hà Nội</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="quote-card reveal" style="--d:70ms">
+            <div class="quote-stars" aria-label="5 trên 5">★★★★★</div>
+            <blockquote>
+              “Heatmap kiểu GitHub nhưng dành cho việc học. Nhìn <strong>chuỗi 12 ngày liên tiếp</strong>
+              là mình không nỡ bỏ ca tối, dù bài tập còn dài.”
+            </blockquote>
+            <div class="quote-person">
+              <span class="avatar avatar--b">BN</span>
+              <div>
+                <b>Bảo Nam</b>
+                <span>Lớp 11 · TP. Hồ Chí Minh</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="quote-card reveal" style="--d:140ms">
+            <div class="quote-stars" aria-label="5 trên 5">★★★★★</div>
+            <blockquote>
+              “Không cần bật cam, không ồn. Chỉ cần bấm vào phòng Toán là có cảm giác
+              <strong>có người đang học cùng mình</strong> — đúng thứ mình thiếu khi tự học ở nhà.”
+            </blockquote>
+            <div class="quote-person">
+              <span class="avatar avatar--c">TT</span>
+              <div>
+                <b>Thu Trang</b>
+                <span>Lớp 12 · Đà Nẵng</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- FAQ                                                                -->
+    <!-- ================================================================== -->
+    <section class="section section--tight" id="faq">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2 class="section-title">Câu hỏi thường gặp</h2>
+        </div>
+
+        <div class="faq-wrap reveal">
+          <details class="faq-item" open>
+            <summary>StudyWithMe có cần webcam hay micro không? <span class="plus" data-icon="plus"></span></summary>
+            <div class="faq-answer">
+              Không. Toàn bộ trải nghiệm được thiết kế để bạn không phải bật camera. Phòng học truyền
+              trạng thái học tập, chỗ ngồi và chat văn bản — nhẹ băng thông, phù hợp cả khi mạng 4G yếu.
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary>Phòng học có nhân vật hoạt hình 2D không? <span class="plus" data-icon="plus"></span></summary>
+            <div class="faq-answer">
+              Phiên bản này tập trung vào nhịp học thay vì không gian 2D: phòng học là một giao diện tối giản
+              với danh sách người đang học, chỗ ngồi, trạng thái và đồng hồ tập trung. Bạn vẫn có avatar,
+              Study Stars và cảm giác “có bạn học cùng”, nhưng không bị phân tán bởi hình ảnh chuyển động.
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary>Có mất phí không? <span class="plus" data-icon="plus"></span></summary>
+            <div class="faq-answer">
+              Không. Ở giai đoạn này, toàn bộ phòng học, kế hoạch, thống kê và Study Stars đều miễn phí.
+              Không cần thẻ, không có bản dùng thử giới hạn.
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary>Dùng trên điện thoại có ổn không? <span class="plus" data-icon="plus"></span></summary>
+            <div class="faq-answer">
+              Có. Giao diện responsive và có thể thêm vào màn hình chính như một PWA. Bạn có thể đặt điện thoại
+              cạnh bàn học để theo dõi đồng hồ, timeline và nhận nhắc nhở mà không cần cài ứng dụng nặng.
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary>Dữ liệu học tập của tôi được lưu ở đâu? <span class="plus" data-icon="plus"></span></summary>
+            <div class="faq-answer">
+              Dữ liệu học tập được lưu trong cơ sở dữ liệu trên máy chủ StudyWithMe và gắn với tài khoản của bạn.
+              Khách vẫn dùng được đầy đủ tính năng; khi tạo tài khoản, hồ sơ, lịch học và tiến độ hiện có được giữ nguyên
+              và có thể tiếp tục trên thiết bị khác.
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary>Làm sao rủ bạn vào phòng Nhóm? <span class="plus" data-icon="plus"></span></summary>
+            <div class="faq-answer">
+              Tạo phòng Nhóm trong Sảnh chính, sau đó bấm “Mời bạn” để sao chép một đường link ngắn.
+              Bạn gửi link qua Messenger/Zalo, bạn của bạn mở là vào đúng phòng — không cần tạo tài khoản phức tạp.
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- CTA                                                                -->
+    <!-- ================================================================== -->
+    <section class="section section--tight">
+      <div class="container">
+        <div class="cta-panel reveal">
+          <h2>Buổi học tiếp theo bắt đầu từ đây.</h2>
+          <p>Không cần chuẩn bị gì nhiều. Chọn một phòng, bật đồng hồ và để đêm nay trôi qua thật đáng kể.</p>
+          <div class="cta-actions">
+            <a class="btn btn-accent btn-lg" href="dashboard.html">Vào sảnh chính <span data-icon="arrow-right"></span></a>
+            <a class="btn btn-outline btn-lg" href="planner.html">Lên kế hoạch trước</a>
+          </div>
+          <div class="cta-note">MIỄN PHÍ · KHÔNG WEBCAM · KHÔNG QUẢNG CÁO</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==================================================================== -->
+  <!-- FOOTER                                                               -->
+  <!-- ==================================================================== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="brand" href="index.html">
+            <img class="brand-logo-full" src="assets/img/logo.svg" alt="StudyWithMe — Học cùng nhau">
+          </a>
+          <p>Không gian học tập trực tuyến dành cho học sinh THPT Việt Nam. Học cùng nhau, giữ nhịp và tiến bộ mỗi ngày.</p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Sản phẩm</h4>
+          <a href="dashboard.html">Sảnh chính</a>
+          <a href="room.html">Phòng học</a>
+          <a href="planner.html">Kế hoạch học</a>
+          <a href="stats.html">Thống kê</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>Tài nguyên</h4>
+          <a href="#how">Cách hoạt động</a>
+          <a href="#features">Tính năng</a>
+          <a href="#faq">Câu hỏi thường gặp</a>
+          <a href="profile.html">Cài đặt tài khoản</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>Dự án</h4>
+          <a href="#data">Kiến trúc &amp; dữ liệu</a>
+          <a href="#">Báo cáo bài tập lớn</a>
+          <a href="#">Nhóm thực hiện</a>
+          <a href="#">Đại học Mở Hà Nội</a>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 StudyWithMe · Đồ án Công nghệ phần mềm — Khoa CNTT, Trường Đại học Mở Hà Nội.</span>
+        <div class="footer-social">
+          <a href="#">GitHub</a>
+          <a href="#">Facebook</a>
+          <a href="#">Email</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/api/bootstrap.js"></script>
+  <script src="assets/js/data.js" defer></script>
+  <script src="assets/js/ui.js" defer></script>
+  <script src="assets/js/landing.js" defer></script>
+</body>
+</html>

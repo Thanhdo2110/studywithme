@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="vi" data-accent="green">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kế hoạch học tập — StudyWithMe</title>
+  <meta name="description" content="Time-blocking theo môn học, danh sách đầu việc và tiến độ hoàn thành trong tuần.">
+  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script>
+    (function () {
+      try {
+        var saved = JSON.parse(localStorage.getItem("studywithme.v1") || "{}");
+        var profile = saved.profile || {};
+        var root = document.documentElement;
+        root.dataset.theme = profile.theme === "dark" ? "dark" : "light";
+        root.dataset.accent = profile.accent || "green";
+      } catch (err) {
+        document.documentElement.dataset.theme = "light";
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/app.css">
+</head>
+<body class="app-body-page" data-page="planner">
+  <div class="app">
+    <aside class="sidebar" id="appSidebar"></aside>
+
+    <div class="app-body">
+      <header class="topbar" id="topbar"></header>
+
+      <main class="page">
+        <div class="page-head">
+          <div>
+            <h1>Kế hoạch học tập</h1>
+            <p>Chia tuần thành từng khối thời gian theo môn. Ít hơn nhưng đều hơn.</p>
+          </div>
+          <div class="page-head-actions">
+            <div class="week-nav">
+              <button class="btn-icon" id="prevWeek" aria-label="Tuần trước"><span data-icon="chevron-left"></span></button>
+              <b id="weekLabel">Tuần này</b>
+              <button class="btn-icon" id="nextWeek" aria-label="Tuần sau"><span data-icon="chevron-right"></span></button>
+              <button class="btn btn-ghost btn-sm" id="todayWeek">Hôm nay</button>
+            </div>
+            <button class="btn btn-accent btn-sm" data-open-modal="scheduleModal"><span data-icon="plus"></span> Thêm ca học</button>
+          </div>
+        </div>
+
+        <div class="planner-summary" id="plannerSummary"></div>
+
+        <div class="planner-grid">
+          <section class="panel timeline-card">
+            <div class="tl-head" id="tlHead"></div>
+            <div class="tl-scroll">
+              <div class="tl-inner">
+                <div class="tl-body">
+                  <div class="tl-hours" id="tlHours"></div>
+                  <div class="tl-cols" id="tlCols"></div>
+                </div>
+              </div>
+            </div>
+            <div class="tl-legend" id="tlLegend"></div>
+          </section>
+
+          <aside class="panel todo-card">
+            <div class="panel-head">
+              <h2>Việc cần làm</h2>
+              <span class="hint" id="todoHint">0 / 0</span>
+            </div>
+            <div class="todo-progress">
+              <div class="todo-progress-top">
+                <b><span id="todoDone">0</span><small>/ <span id="todoTotal">0</span> việc</small></b>
+                <span id="todoPercent">0%</span>
+              </div>
+              <div class="bar"><span id="todoBar" style="width:0%"></span></div>
+            </div>
+            <div class="todo-list" id="todoList"></div>
+            <form class="todo-add" id="todoForm">
+              <div class="input-row">
+                <input class="input" id="todoSubject" type="text" maxlength="40" placeholder="Môn học" aria-label="Môn học">
+                <input class="input" id="todoInput" type="text" maxlength="80" placeholder="Thêm đầu việc mới…" aria-label="Nội dung việc">
+              </div>
+              <button class="btn btn-soft btn-sm btn-block" type="submit"><span data-icon="plus"></span> Thêm việc</button>
+            </form>
+          </aside>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Add schedule -------------------------------------------------------- -->
+  <div class="modal" id="scheduleModal" aria-hidden="true">
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="scheduleTitle">
+      <div class="modal-head">
+        <div>
+          <h2 class="modal-title" id="scheduleTitle">Thêm ca học</h2>
+          <p class="modal-sub">Một khối thời gian rõ ràng giúp bạn bắt đầu dễ hơn.</p>
+        </div>
+        <button class="modal-close" data-close aria-label="Đóng"><span data-icon="x"></span></button>
+      </div>
+
+      <form class="modal-body" id="scheduleForm">
+        <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="field">
+            <label for="schSubject">Môn học</label>
+            <input class="input" id="schSubject" type="text" maxlength="40" placeholder="VD: Toán">
+          </div>
+          <div class="field">
+            <label for="schDay">Ngày</label>
+            <select class="select" id="schDay">
+              <option value="0">Thứ Hai</option>
+              <option value="1">Thứ Ba</option>
+              <option value="2">Thứ Tư</option>
+              <option value="3">Thứ Năm</option>
+              <option value="4">Thứ Sáu</option>
+              <option value="5">Thứ Bảy</option>
+              <option value="6">Chủ nhật</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="field">
+            <label for="schStart">Bắt đầu</label>
+            <input class="input" id="schStart" type="time" value="19:00" step="900" required>
+          </div>
+          <div class="field">
+            <label for="schDuration">Thời lượng</label>
+            <select class="select" id="schDuration">
+              <option value="30">30 phút</option>
+              <option value="45">45 phút</option>
+              <option value="60" selected>60 phút</option>
+              <option value="90">90 phút</option>
+              <option value="120">120 phút</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="schNote">Ghi chú / mục tiêu</label>
+          <input class="input" id="schNote" type="text" maxlength="80" placeholder="VD: Chữa 20 câu cực trị hàm số">
+        </div>
+
+        <p class="field-hint">Ca học sẽ xuất hiện trên timeline và trong “Lịch hôm nay” ở Sảnh chính.</p>
+      </form>
+
+      <div class="modal-foot">
+        <button class="btn btn-ghost" data-close>Huỷ</button>
+        <button class="btn btn-accent" type="submit" form="scheduleForm">Thêm vào timeline</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Block detail -------------------------------------------------------- -->
+  <div class="modal" id="blockModal" aria-hidden="true">
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="blockTitle">
+      <div class="modal-head">
+        <div>
+          <span class="pill" id="blockSubjectPill">Môn học</span>
+          <h2 class="modal-title mt-8" id="blockTitle">Ca học</h2>
+          <p class="modal-sub" id="blockTime">—</p>
+        </div>
+        <button class="modal-close" data-close aria-label="Đóng"><span data-icon="x"></span></button>
+      </div>
+      <div class="modal-body">
+        <p id="blockNote" style="font-size:13.5px;color:var(--text-2);line-height:1.7"></p>
+        <div class="pill pill--outline" style="align-self:flex-start">
+          <span data-icon="clock"></span> <span id="blockDuration">60 phút</span>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-danger btn-sm" id="deleteBlock"><span data-icon="trash"></span> Xoá ca học</button>
+        <button class="btn btn-accent btn-sm" data-close>Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/api/bootstrap.js"></script>
+  <script src="assets/js/data.js" defer></script>
+  <script src="assets/js/ui.js" defer></script>
+  <script src="assets/js/shell.js" defer></script>
+  <script src="assets/js/planner.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+node_modules
+data
+.git
+.gitignore
+.freebuff
+.env
+.env.*
+*.log
+coverage
+screenshot*.png

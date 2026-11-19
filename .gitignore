@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Local database cũ (SQLite) và dữ liệu runtime
+data/
+*.db
+*.db-wal
+*.db-shm
+
+# Biến môi trường / bí mật
+.env
+.env.local
+
+# Công cụ & hệ điều hành
+.freebuff/
+.DS_Store
+Thumbs.db
+*.log
+coverage/

@@ -1,0 +1,103 @@
+name: studywithme
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: swm-postgres
+    environment:
+      POSTGRES_USER: swm
+      POSTGRES_PASSWORD: swm
+      POSTGRES_DB: swm
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      # 5433 ở host để không đụng Postgres cài sẵn trên máy.
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres-init.sql:/docker-entrypoint-initdb.d/10-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U swm -d swm"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    container_name: swm-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      # 6380 ở host để không đụng Redis cài sẵn trên máy.
+      - "6380:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # BACKEND — Node.js: REST API + SSE (không phục vụ giao diện).
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: swm-backend
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      TZ: Asia/Ho_Chi_Minh
+      SERVE_STATIC: "false"
+      TRUST_PROXY: "1"
+      DATABASE_URL: postgres://swm:swm@postgres:5432/swm
+      REDIS_URL: redis://redis:6379
+      GUEST_RETENTION_DAYS: "14"
+      # Chỉ dùng khi chạy `npm test` trong container.
+      TEST_DATABASE_URL: postgres://swm:swm@postgres:5432/swm_test
+      TEST_REDIS_URL: redis://redis:6379/1
+    ports:
+      # Chỉ mở trên loopback để test API trực tiếp, không lộ ra mạng LAN.
+      - "127.0.0.1:3001:3000"
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/api/health').then(function(r){process.exit(r.ok?0:1)}).catch(function(){process.exit(1)})",
+        ]
+      interval: 15s
+      timeout: 5s
+      start_period: 25s
+      retries: 5
+
+  # FRONTEND — nginx: HTML/CSS/JS tĩnh + reverse proxy /api sang backend.
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: swm-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
+      interval: 15s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+
+volumes:
+  pgdata:
+  redisdata:
+  uploads:

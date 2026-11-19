@@ -1,0 +1,2 @@
+BUG-001 retest: timer ran 2 seconds, UI today focus=0p, streak=0 day. PASS.
+BUG-002 retest: exam set without date showed —, Chưa đặt ngày thi, stored examDate="". PASS.

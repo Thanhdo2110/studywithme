@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="StudyWithMe">
+  <title>StudyWithMe — đánh dấu trang học, đúng giờ mỗi ngày</title>
+  <!-- Vòng tròn: mặt đồng hồ / vòng tập trung -->
+  <circle cx="48" cy="48" r="36.5" fill="none" stroke="currentColor" stroke-width="6.5"/>
+  <!-- Dải bookmark: cài từ 12 giờ, đáy V chạm đúng tâm — kim chỉ 12 giờ -->
+  <path d="M37.5 12 37.5 57Q37.5 60.5 40.2 58.6L48 48.5 55.8 58.6Q58.5 60.5 58.5 57L58.5 12Z" fill="currentColor"/>
+</svg>

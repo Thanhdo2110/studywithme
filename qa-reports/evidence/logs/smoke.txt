@@ -1,0 +1,16 @@
+Smoke test - 2026-11-18
+PASS / 200
+PASS /dashboard.html 200
+PASS /myroom.html 200
+PASS /planner.html 200
+PASS /room.html 200
+PASS /stats.html 200
+PASS /profile.html 200
+PASS /api/health 200
+PASS /api/bootstrap.js 200
+
+Docker containers:
+swm-frontend healthy
+swm-backend healthy
+swm-postgres healthy
+swm-redis healthy

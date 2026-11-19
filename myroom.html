@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="vi" data-accent="green">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phòng của tôi — StudyWithMe</title>
+  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script>
+    (function () {
+      try {
+        var saved = JSON.parse(localStorage.getItem("studywithme.v1") || "{}");
+        var profile = saved.profile || {};
+        document.documentElement.dataset.theme = profile.theme === "dark" ? "dark" : "light";
+        document.documentElement.dataset.accent = profile.accent || "green";
+      } catch (err) {
+        document.documentElement.dataset.theme = "light";
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/app.css">
+</head>
+<body class="app-body-page" data-page="myrooms">
+  <div class="app">
+    <aside class="sidebar" id="appSidebar"></aside>
+    <div class="app-body">
+      <header class="topbar" id="topbar"></header>
+      <main class="page">
+        <div class="page-head">
+          <div>
+            <h1>Phòng của tôi</h1>
+            <p>Quản lý những phòng bạn đã tạo, đang tham gia hoặc đang học cùng.</p>
+          </div>
+          <div class="page-head-actions">
+            <button class="btn btn-accent btn-sm" data-open-modal="createRoomModal">
+              <span data-icon="plus"></span> Tạo phòng
+            </button>
+          </div>
+        </div>
+
+        <section class="myroom-overview" aria-label="Tổng quan phòng">
+          <article class="myroom-stat">
+            <span class="myroom-stat-icon"><span data-icon="grid"></span></span>
+            <div><span>Tổng phòng</span><b id="myroomTotal">0</b></div>
+          </article>
+          <article class="myroom-stat">
+            <span class="myroom-stat-icon"><span data-icon="trophy"></span></span>
+            <div><span>Phòng tôi quản lý</span><b id="myroomHosted">0</b></div>
+          </article>
+          <article class="myroom-stat">
+            <span class="myroom-stat-icon"><span data-icon="users"></span></span>
+            <div><span>Đang tham gia</span><b id="myroomJoined">0</b></div>
+          </article>
+        </section>
+
+        <section class="panel myroom-panel">
+          <div class="panel-head myroom-toolbar">
+            <div class="myroom-tabs" id="myroomFilters">
+              <button class="chip active" data-filter="all">Tất cả</button>
+              <button class="chip" data-filter="host">Chủ phòng</button>
+              <button class="chip" data-filter="member">Thành viên</button>
+            </div>
+            <span class="hint" id="myroomCount">0 phòng</span>
+          </div>
+          <div class="myroom-grid" id="myroomList"></div>
+          <div class="empty hidden" id="myroomEmpty" style="padding:52px 18px">
+            <span data-icon="users"></span>
+            <span>Chưa có phòng nào trong danh mục này.<br>Tạo phòng mới để bắt đầu buổi học.</span>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="modal" id="createRoomModal" aria-hidden="true">
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="createRoomTitle">
+      <div class="modal-head">
+        <div>
+          <h2 class="modal-title" id="createRoomTitle">Tạo phòng học</h2>
+          <p class="modal-sub">Chọn chế độ, đặt tên và bắt đầu. Bạn sẽ là chủ phòng.</p>
+        </div>
+        <button class="modal-close" data-close aria-label="Đóng"><span data-icon="x"></span></button>
+      </div>
+      <form class="modal-body" id="createRoomForm">
+        <div class="field">
+          <span class="field-label">Chế độ phòng</span>
+          <div class="type-picker" id="typePicker">
+            <button type="button" class="type-option active" data-type="community">
+              <span data-icon="globe"></span><b>Cộng đồng</b><span>Tối đa 20 người</span>
+            </button>
+            <button type="button" class="type-option" data-type="group">
+              <span data-icon="lock"></span><b>Nhóm bạn</b><span>Tối đa 8 người</span>
+            </button>
+            <button type="button" class="type-option" data-type="solo">
+              <span data-icon="user"></span><b>Cá nhân</b><span>Chỉ dành cho bạn</span>
+            </button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="roomName">Tên phòng</label>
+          <input class="input" id="roomName" type="text" maxlength="60" required placeholder="VD: Ôn Toán 12 · Cực trị hàm số">
+        </div>
+        <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="field">
+            <label for="roomSubject">Môn học</label>
+            <input class="input" id="roomSubject" type="text" maxlength="40" placeholder="VD: Toán">
+          </div>
+          <div class="field">
+            <label for="roomTopic">Mục tiêu buổi học</label>
+            <input class="input" id="roomTopic" type="text" maxlength="70" placeholder="VD: Chữa 20 câu cực trị">
+          </div>
+        </div>
+        <p class="field-hint" id="roomTypeHint">Phòng Cộng đồng hiển thị công khai ở Sảnh chính.</p>
+      </form>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" data-close>Huỷ</button>
+        <button class="btn btn-accent" type="submit" form="createRoomForm">Tạo phòng</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/api/bootstrap.js"></script>
+  <script src="assets/js/data.js" defer></script>
+  <script src="assets/js/ui.js" defer></script>
+  <script src="assets/js/shell.js" defer></script>
+  <script src="assets/js/myroom.js" defer></script>
+</body>
+</html>

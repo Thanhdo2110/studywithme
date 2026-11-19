@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="vi" data-accent="green">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thống kê học tập — StudyWithMe</title>
+  <meta name="description" content="Heatmap thói quen học tập, phân bố môn học, khung giờ tập trung và phiếu thành tích.">
+  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script>
+    (function () {
+      try {
+        var saved = JSON.parse(localStorage.getItem("studywithme.v1") || "{}");
+        var profile = saved.profile || {};
+        var root = document.documentElement;
+        root.dataset.theme = profile.theme === "dark" ? "dark" : "light";
+        root.dataset.accent = profile.accent || "green";
+      } catch (err) {
+        document.documentElement.dataset.theme = "light";
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/app.css">
+</head>
+<body class="app-body-page" data-page="stats">
+  <div class="app">
+    <aside class="sidebar" id="appSidebar"></aside>
+
+    <div class="app-body">
+      <header class="topbar" id="topbar"></header>
+
+      <main class="page">
+        <div class="page-head">
+          <div>
+            <h1>Thống kê học tập</h1>
+            <p>Nhìn lại nhịp học của bạn — không phán xét, chỉ để điều chỉnh.</p>
+          </div>
+          <div class="page-head-actions">
+            <div class="seg" id="rangeSeg">
+              <button data-range="90" class="active">90 ngày</button>
+              <button data-range="180">6 tháng</button>
+              <button data-range="365">1 năm</button>
+            </div>
+            <button class="btn btn-soft btn-sm" id="exportBtn"><span data-icon="download"></span> Xuất phiếu thành tích</button>
+          </div>
+        </div>
+
+        <section class="kpi-grid" id="kpiGrid" aria-label="Chỉ số tổng quan"></section>
+
+        <div class="stats-grid">
+          <div class="stats-left">
+            <!-- Heatmap -------------------------------------------------- -->
+            <section class="panel heat-card">
+              <div class="panel-head">
+                <h2>Heatmap thói quen</h2>
+                <span class="hint" id="heatRange">90 ngày gần nhất</span>
+              </div>
+              <div class="panel-body">
+                <div class="heat-top">
+                  <span class="mono" style="font-size:9.5px;color:var(--text-4)">MỖI Ô LÀ MỘT NGÀY</span>
+                  <div class="heat-legend">
+                    <span>Ít</span>
+                    <i class="l0"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i>
+                    <span>Nhiều</span>
+                  </div>
+                </div>
+
+                <div class="heat-body">
+                  <div class="heat-scroll">
+                    <div class="heat-inner">
+                      <div class="heat-weekdays" aria-hidden="true">
+                        <span></span><span>T2</span><span></span><span>T4</span><span></span><span>T6</span><span></span>
+                      </div>
+                      <div class="heat-main">
+                        <div class="heat-months" id="heatMonths"></div>
+                        <div class="heat-grid" id="heatGrid" role="img" aria-label="Heatmap thời gian học theo ngày"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="heat-side">
+                    <div class="heat-side-item"><span>Ngày đã học</span><b id="heatDays">—</b></div>
+                    <div class="heat-side-item"><span>Trung bình / ngày</span><b id="heatAvg">—</b></div>
+                    <div class="heat-side-item"><span>Chuỗi hiện tại</span><b id="heatStreak">—</b></div>
+                    <div class="heat-side-item"><span>Ngày tốt nhất</span><b id="heatBest">—</b></div>
+                  </div>
+                </div>
+
+                <div class="heat-note">
+                  <span>Tổng trong khoảng: <b id="heatTotal">—</b></span>
+                  <span>Giữ nhịp đều quan trọng hơn một ngày học quá dài.</span>
+                </div>
+              </div>
+            </section>
+
+            <div class="stats-two">
+              <section class="panel chart-card">
+                <div class="panel-head"><h2>Phân bố theo môn</h2><span class="hint">Theo thời gian</span></div>
+                <div class="panel-body">
+                  <div class="subject-bars" id="subjectBars"></div>
+                </div>
+              </section>
+
+              <section class="panel chart-card">
+                <div class="panel-head"><h2>Khung giờ tập trung</h2><span class="hint">Trung bình</span></div>
+                <div class="panel-body">
+                  <div class="hour-chart" id="hourChart"></div>
+                  <p style="font-size:10.5px;color:var(--text-3);margin-top:10px;line-height:1.6">
+                    Bạn tập trung tốt nhất vào buổi tối. Giữ khung <b style="color:var(--text)">19:00 – 22:00</b> cho các môn cần suy luận.
+                  </p>
+                </div>
+              </section>
+            </div>
+          </div>
+
+          <!-- Right rail ------------------------------------------------ -->
+          <aside class="stats-right">
+            <section class="panel" style="padding:14px">
+              <div class="report-card">
+                <div class="report-brand">
+                  <span>Phiếu thành tích · StudyWithMe</span>
+                  <span class="dot dot--live"></span>
+                </div>
+                <div class="report-big" id="reportMinutes">0p</div>
+                <div class="report-sub" id="reportSub">Chưa có dữ liệu hôm nay</div>
+                <div class="report-grid">
+                  <div class="report-item">
+                    <span>Study Stars</span>
+                    <b id="reportStars">+0</b>
+                  </div>
+                  <div class="report-item">
+                    <span>Chuỗi ngày</span>
+                    <b id="reportStreak">0 ngày</b>
+                  </div>
+                  <div class="report-item">
+                    <span>Việc hoàn thành</span>
+                    <b id="reportTasks">5 / 7</b>
+                  </div>
+                  <div class="report-item">
+                    <span>Môn nhiều nhất</span>
+                    <b id="reportFocus">Toán</b>
+                  </div>
+                </div>
+                <p class="report-quote" id="reportQuote">“Không cần hoàn hảo. Chỉ cần quay lại bàn học.”</p>
+              </div>
+              <div class="report-actions">
+                <button class="btn btn-soft btn-sm grow" id="exportBtn2"><span data-icon="download"></span> Tải ảnh</button>
+                <a class="btn btn-ghost btn-sm" href="room.html">Học tiếp</a>
+              </div>
+              <p class="mono" style="font-size:8.5px;color:var(--text-4);margin-top:9px;letter-spacing:.05em" id="reportDate">—</p>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head"><h2>Thành tích</h2><span class="hint">4 / 6</span></div>
+              <div class="panel-body">
+                <div class="achievements">
+                  <div class="achievement">
+                    <span class="ach-ico" data-icon="flame"></span>
+                    <div><b>Chuỗi 7 ngày</b><span>Học ít nhất 20 phút mỗi ngày</span></div>
+                    <span class="status">ĐẠT</span>
+                  </div>
+                  <div class="achievement">
+                    <span class="ach-ico" data-icon="clock"></span>
+                    <div><b>100 giờ</b><span>Tổng thời gian tập trung</span></div>
+                    <span class="status">ĐẠT</span>
+                  </div>
+                  <div class="achievement">
+                    <span class="ach-ico" data-icon="sun"></span>
+                    <div><b>Chim sớm</b><span>Bắt đầu trước 6:00 sáng</span></div>
+                    <span class="status">ĐẠT</span>
+                  </div>
+                  <div class="achievement">
+                    <span class="ach-ico" data-icon="shield"></span>
+                    <div><b>Không bỏ ca</b><span>7 ngày liền không huỷ ca học</span></div>
+                    <span class="status">ĐẠT</span>
+                  </div>
+                  <div class="achievement locked">
+                    <span class="ach-ico" data-icon="trophy"></span>
+                    <div><b>30 ngày bền bỉ</b><span>Chuỗi 30 ngày liên tiếp</span></div>
+                    <span class="status">18/30</span>
+                  </div>
+                  <div class="achievement locked">
+                    <span class="ach-ico" data-icon="star"></span>
+                    <div><b>Bậc thầy tập trung</b><span>Đạt 5.000 Study Stars</span></div>
+                    <span class="status">0</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="heat-tooltip" id="heatTooltip"></div>
+
+  <script src="/api/bootstrap.js"></script>
+  <script src="assets/js/data.js" defer></script>
+  <script src="assets/js/ui.js" defer></script>
+  <script src="assets/js/shell.js" defer></script>
+  <script src="assets/js/stats.js" defer></script>
+</body>
+</html>

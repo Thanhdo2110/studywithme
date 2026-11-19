@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="vi" data-accent="green">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sảnh chính — StudyWithMe</title>
+  <meta name="description" content="Sảnh chính StudyWithMe: phòng học cộng đồng, kế hoạch hôm nay và tiến độ học tập của bạn.">
+  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script>
+    (function () {
+      try {
+        var saved = JSON.parse(localStorage.getItem("studywithme.v1") || "{}");
+        var profile = saved.profile || {};
+        var root = document.documentElement;
+        root.dataset.theme = profile.theme === "dark" ? "dark" : "light";
+        root.dataset.accent = profile.accent || "green";
+      } catch (err) {
+        document.documentElement.dataset.theme = "light";
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/app.css">
+</head>
+<body class="app-body-page" data-page="dashboard">
+  <div class="app">
+    <aside class="sidebar" id="appSidebar"></aside>
+
+    <div class="app-body">
+      <header class="topbar" id="topbar"></header>
+
+      <main class="page">
+        <div class="page-head">
+          <div>
+            <h1 id="greeting">Chào buổi tối, Đô 👋</h1>
+            <p>Hôm nay bạn muốn học gì? Một ca 50 phút là đủ để bắt đầu.</p>
+          </div>
+          <div class="page-head-actions">
+            <a class="btn btn-soft btn-sm" href="planner.html"><span data-icon="calendar"></span> Kế hoạch hôm nay</a>
+            <button class="btn btn-accent btn-sm" data-open-modal="createRoomModal"><span data-icon="plus"></span> Tạo phòng</button>
+          </div>
+        </div>
+
+        <!-- Exam countdown ------------------------------------------------ -->
+        <section class="exam-banner">
+          <div class="exam-dday">
+            <b id="examDays">—</b>
+            <span>đến kỳ thi</span>
+          </div>
+          <div class="exam-meta">
+            <b id="examTitle">Chưa đặt mục tiêu kỳ thi</b>
+            <p>Ngày thi: <span id="examDate">—</span> · Mục tiêu <span id="examGoal">0</span> giờ mỗi ngày</p>
+            <div class="bar"><span id="examBar" style="width:84%"></span></div>
+            <div class="exam-progress-label">
+              <span id="examLeftLabel">Còn 57 ngày</span>
+              <span id="examPercentLabel">84% quãng đường</span>
+            </div>
+          </div>
+          <div class="exam-actions">
+            <a class="btn btn-soft btn-sm" href="profile.html"><span data-icon="settings"></span> Đổi mục tiêu</a>
+          </div>
+        </section>
+
+        <!-- Stats --------------------------------------------------------- -->
+        <section class="stat-grid" id="statGrid" aria-label="Thống kê nhanh"></section>
+
+        <!-- Rooms + rail -------------------------------------------------- -->
+        <div class="dash-grid" id="rooms">
+          <div class="dash-main">
+            <div class="section-toolbar">
+              <h2>Phòng cộng đồng</h2>
+              <span class="count" id="roomCount">6 phòng</span>
+              <div class="chips-scroll" id="roomFilters" style="margin-left:auto"></div>
+            </div>
+
+            <div class="room-grid" id="roomGrid"></div>
+            <div id="roomEmpty" class="empty hidden">
+              <span data-icon="search"></span>
+              <span>Không tìm thấy phòng phù hợp. Thử bộ lọc khác hoặc tạo phòng mới.</span>
+            </div>
+          </div>
+
+          <aside class="dash-rail">
+            <div class="panel">
+              <div class="panel-head">
+                <h2>Lịch hôm nay</h2>
+                <a href="planner.html" class="hint">Mở timeline <span data-icon="arrow-right"></span></a>
+              </div>
+              <div class="panel-body" id="todaySchedule"></div>
+              <div class="dash-tip" style="padding:0 16px 14px">
+                <span class="pill pill--mono" id="todayScheduleCount"><span class="dot"></span> 0 ca học</span>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <h2>Bạn học đang online</h2>
+                <span class="hint">0 người</span>
+              </div>
+              <div class="panel-body" id="friendsList"></div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <h2>Nhắc nhỏ</h2>
+                <span class="hint">Heartbeat</span>
+              </div>
+              <div class="panel-body">
+                <p style="font-size:11.8px;color:var(--text-3);line-height:1.7">
+                  Cứ 15 phút, StudyWithMe kiểm tra bạn còn ở bàn học. Ngồi lại thêm chút nhé —
+                  chuỗi <b style="color:var(--text)" id="railStreak">0 ngày</b> của bạn đang đẹp.
+                </p>
+                <a class="btn btn-soft btn-sm btn-block mt-12" href="room.html">
+                  <span data-icon="timer"></span> Vào phòng học
+                </a>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Create room modal ------------------------------------------------- -->
+  <div class="modal" id="createRoomModal" aria-hidden="true">
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="createRoomTitle">
+      <div class="modal-head">
+        <div>
+          <h2 class="modal-title" id="createRoomTitle">Tạo phòng học</h2>
+          <p class="modal-sub">Chọn chế độ, đặt tên và bắt đầu. Bạn sẽ là chủ phòng.</p>
+        </div>
+        <button class="modal-close" data-close aria-label="Đóng"><span data-icon="x"></span></button>
+      </div>
+
+      <form class="modal-body" id="createRoomForm">
+        <div class="field">
+          <span class="field-label">Chế độ phòng</span>
+          <div class="type-picker" id="typePicker">
+            <button type="button" class="type-option active" data-type="community">
+              <span data-icon="globe"></span>
+              <b>Cộng đồng</b>
+              <span>Tối đa 20 người, hiện ở Sảnh chính</span>
+            </button>
+            <button type="button" class="type-option" data-type="group">
+              <span data-icon="lock"></span>
+              <b>Nhóm bạn</b>
+              <span>Tối đa 8 người, vào bằng link</span>
+            </button>
+            <button type="button" class="type-option" data-type="solo">
+              <span data-icon="user"></span>
+              <b>Cá nhân</b>
+              <span>1 người, chat đổi thành sổ nháp</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="roomName">Tên phòng</label>
+          <input class="input" id="roomName" type="text" maxlength="60" required
+                 placeholder="VD: Ôn Toán 12 · Cực trị hàm số">
+        </div>
+
+        <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="field">
+            <label for="roomSubject">Môn học</label>
+            <input class="input" id="roomSubject" type="text" maxlength="40" placeholder="VD: Toán">
+          </div>
+          <div class="field">
+            <label for="roomTopic">Mục tiêu buổi học</label>
+            <input class="input" id="roomTopic" type="text" maxlength="70"
+                   placeholder="VD: Chữa 20 câu cực trị">
+          </div>
+        </div>
+
+        <p class="field-hint" id="roomTypeHint">
+          Phòng Cộng đồng hiển thị công khai ở Sảnh chính. Sức chứa tối đa 20 người.
+        </p>
+      </form>
+
+      <div class="modal-foot">
+        <button class="btn btn-ghost" data-close>Huỷ</button>
+        <button class="btn btn-accent" type="submit" form="createRoomForm">Tạo phòng</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/api/bootstrap.js"></script>
+  <script src="assets/js/data.js" defer></script>
+  <script src="assets/js/ui.js" defer></script>
+  <script src="assets/js/shell.js" defer></script>
+  <script src="assets/js/dashboard.js" defer></script>
+</body>
+</html>

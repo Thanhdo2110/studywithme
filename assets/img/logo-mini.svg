@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="StudyWithMe">
+  <title>StudyWithMe — mini</title>
+  <circle cx="48" cy="48" r="36.5" fill="none" stroke="currentColor" stroke-width="8"/>
+  <path d="M38 12 38 56.5Q38 60.5 41 58.4L48 48.5 55 58.4Q58 60.5 58 56.5L58 12Z" fill="currentColor"/>
+</svg>

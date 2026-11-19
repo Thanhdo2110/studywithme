@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="vi" data-accent="green">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hồ sơ &amp; cài đặt — StudyWithMe</title>
+  <meta name="description" content="Cấu hình mục tiêu thi, avatar, màu nhấn, nhắc nhở và đổi Study Stars.">
+  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script>
+    (function () {
+      try {
+        var saved = JSON.parse(localStorage.getItem("studywithme.v1") || "{}");
+        var profile = saved.profile || {};
+        var root = document.documentElement;
+        root.dataset.theme = profile.theme === "dark" ? "dark" : "light";
+        root.dataset.accent = profile.accent || "green";
+      } catch (err) {
+        document.documentElement.dataset.theme = "light";
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/app.css">
+</head>
+<body class="app-body-page" data-page="profile">
+  <div class="app">
+    <aside class="sidebar" id="appSidebar"></aside>
+
+    <div class="app-body">
+      <header class="topbar" id="topbar"></header>
+
+      <main class="page page--narrow">
+        <div class="page-head">
+          <div>
+            <h1>Hồ sơ &amp; cài đặt</h1>
+            <p>Mục tiêu càng rõ, buổi học càng dễ bắt đầu.</p>
+          </div>
+          <div class="page-head-actions">
+            <button class="btn btn-soft btn-sm" data-open-modal="resetModal"><span data-icon="rotate"></span> Đặt lại dữ liệu</button>
+            <button class="btn btn-accent btn-sm" type="submit" form="profileForm"><span data-icon="check"></span> Lưu thay đổi</button>
+          </div>
+        </div>
+
+        <div class="profile-grid">
+          <!-- Left ------------------------------------------------------ -->
+          <aside class="profile-left">
+            <section class="panel profile-hero">
+              <div id="heroAvatar"></div>
+              <h2 id="heroName">Khách</h2>
+              <p class="ph-sub" id="heroSchool">Chưa đặt mục tiêu</p>
+              <div class="ph-pills" id="heroPills"></div>
+              <p style="font-size:11.5px;color:var(--text-3);line-height:1.65;margin-top:2px" id="heroBio"></p>
+              <div class="profile-stats">
+                <div class="profile-stat"><b id="heroHours">0p</b><span>giờ học 90 ngày</span></div>
+                <div class="profile-stat"><b id="heroStars">0</b><span>Study Stars</span></div>
+                <div class="profile-stat"><b id="heroStreak">0 ngày</b><span>chuỗi ngày</span></div>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head"><h2>Avatar</h2><span class="hint">Chọn nhân vật đại diện</span></div>
+              <div class="panel-body">
+                <div class="avatar-grid" id="avatarGrid"></div>
+                <p class="field-hint mt-12">Avatar hiển thị trong phòng học và phiếu thành tích.</p>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head"><h2>Màu nhấn</h2><span class="hint">Toàn giao diện</span></div>
+              <div class="panel-body">
+                <div class="swatches" id="accentSwatches">
+                  <button type="button" class="swatch" data-accent="green"><i style="background:#6ad86c"></i>Xanh lá</button>
+                  <button type="button" class="swatch" data-accent="blue"><i style="background:#7aa2f7"></i>Xanh dương</button>
+                  <button type="button" class="swatch" data-accent="violet"><i style="background:#b092ff"></i>Tím</button>
+                  <button type="button" class="swatch" data-accent="amber"><i style="background:#e9b949"></i>Hổ phách</button>
+                </div>
+                <p class="field-hint mt-12">Màu nhấn áp dụng cho nút, đồng hồ và heatmap.</p>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head"><h2>Giao diện</h2><span class="hint">Sáng / Tối</span></div>
+              <div class="panel-body">
+                <div class="theme-grid" id="themeChoice" role="group" aria-label="Chọn giao diện">
+                  <button type="button" class="theme-card" data-theme-opt="dark" aria-pressed="false">
+                    <span class="theme-preview theme-preview--dark" aria-hidden="true"><i></i></span>
+                    <span class="theme-card-label"><span data-icon="moon"></span> Tối</span>
+                  </button>
+                  <button type="button" class="theme-card" data-theme-opt="light" aria-pressed="false">
+                    <span class="theme-preview theme-preview--light" aria-hidden="true"><i></i></span>
+                    <span class="theme-card-label"><span data-icon="sun"></span> Sáng</span>
+                  </button>
+                </div>
+                <p class="field-hint mt-12">Giao diện sáng phù hợp học ban ngày; giao diện tối dịu mắt khi học đêm.</p>
+              </div>
+            </section>
+          </aside>
+
+          <!-- Right ----------------------------------------------------- -->
+          <div class="profile-right">
+            <form class="panel settings-card" id="profileForm">
+              <div class="panel-head">
+                <h2>Thông tin học tập</h2>
+                <span class="hint">Dùng cho D-Day &amp; kế hoạch</span>
+              </div>
+              <div class="panel-body">
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="pName">Họ và tên</label>
+                    <input class="input" id="pName" maxlength="50" required>
+                  </div>
+                  <div class="field">
+                    <label for="pGrade">Khối lớp</label>
+                    <input class="input" id="pGrade" type="text" maxlength="20" placeholder="VD: Lớp 12">
+                  </div>
+
+                  <div class="field">
+                    <label for="pExam">Kỳ thi mục tiêu</label>
+                    <input class="input" id="pExam" type="text" maxlength="60" placeholder="VD: THPT Quốc gia">
+                  </div>
+                  <div class="field">
+                    <label for="pDate">Ngày thi (D-Day)</label>
+                    <input class="input" id="pDate" type="date">
+                  </div>
+
+                  <div class="field field-full">
+                    <label for="pSchool">Trường / mục tiêu</label>
+                    <input class="input" id="pSchool" maxlength="70">
+                  </div>
+
+                  <div class="field">
+                    <label for="pGoal">Mục tiêu mỗi ngày</label>
+                    <select class="select" id="pGoal">
+                      <option value="1">1 giờ</option>
+                      <option value="2">2 giờ</option>
+                      <option value="3">3 giờ</option>
+                      <option value="4">4 giờ</option>
+                      <option value="5">5 giờ</option>
+                      <option value="6">6 giờ</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="pStars">Study Stars</label>
+                    <input class="input" id="pStars" disabled>
+                  </div>
+
+                  <div class="field field-full">
+                    <label for="pBio">Giới thiệu ngắn</label>
+                    <textarea class="textarea" id="pBio" maxlength="160" rows="2"></textarea>
+                  </div>
+                </div>
+
+                <div class="flex gap-8" style="justify-content:flex-end;margin-top:4px">
+                  <button type="button" class="btn btn-ghost btn-sm" id="resetForm">Khôi phục</button>
+                  <button type="submit" class="btn btn-accent btn-sm"><span data-icon="check"></span> Lưu thay đổi</button>
+                </div>
+              </div>
+            </form>
+
+            <section class="panel settings-card">
+              <div class="panel-head"><h2>Nhắc nhở &amp; trải nghiệm</h2><span class="hint">Đồng bộ tài khoản</span></div>
+              <div class="panel-body">
+                <div class="setting-row">
+                  <div>
+                    <b>Nhắc ca học</b>
+                    <span>Thông báo trước 10 phút mỗi ca trên Timeline.</span>
+                  </div>
+                  <label class="switch"><input type="checkbox" id="setReminders"><span class="track"></span></label>
+                </div>
+                <div class="setting-row">
+                  <div>
+                    <b>Heartbeat xác thực</b>
+                    <span>Yêu cầu xác nhận tương tác mỗi 15 phút khi đang học.</span>
+                  </div>
+                  <label class="switch"><input type="checkbox" id="setHeartbeat"><span class="track"></span></label>
+                </div>
+                <div class="setting-row">
+                  <div>
+                    <b>Âm thanh giao diện</b>
+                    <span>Tiếng chuông kết thúc ca và âm thanh Lo-fi.</span>
+                  </div>
+                  <label class="switch"><input type="checkbox" id="setSounds"><span class="track"></span></label>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel" id="shop">
+              <div class="panel-head">
+                <h2>Cửa hàng Sao</h2>
+                <span class="hint" id="shopStars">0 ★</span>
+              </div>
+              <div class="panel-body">
+                <p style="font-size:11.5px;color:var(--text-3);line-height:1.65;margin-bottom:12px">
+                  Mỗi phút tập trung hợp lệ nhận 1 Study Star. Đổi Sao để mở khoá avatar, thú cưng và khung trang trí.
+                </p>
+                <div class="shop-grid" id="shopGrid"></div>
+              </div>
+            </section>
+
+            <section class="panel" id="account">
+              <div class="panel-head"><h2>Tài khoản</h2><span class="hint" id="accountBadge">Khách</span></div>
+              <div class="panel-body">
+                <p id="accountInfo" style="font-size:11.5px;color:var(--text-3);line-height:1.7">
+                  Đang học ở chế độ khách. Tạo tài khoản để đồng bộ hồ sơ, lịch học và tiến độ trên mọi thiết bị.
+                </p>
+                <div class="flex gap-8 mt-12" style="flex-wrap:wrap">
+                  <button class="btn btn-accent btn-sm" type="button" id="accountAuthBtn"><span data-icon="log-in"></span> Đăng nhập / Đăng ký</button>
+                  <button class="btn btn-ghost btn-sm hidden" type="button" id="accountLogoutBtn"><span data-icon="logout"></span> Đăng xuất</button>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head"><h2>Dữ liệu học tập</h2><span class="hint">Máy chủ StudyWithMe</span></div>
+              <div class="panel-body">
+                <p style="font-size:11.5px;color:var(--text-3);line-height:1.7">
+                  Hồ sơ, lịch học, to-do, sổ nháp, tin nhắn và tiến độ được lưu trong cơ sở dữ liệu
+                  trên máy chủ StudyWithMe. Mỗi tài khoản có dữ liệu riêng và được đồng bộ khi bạn đăng nhập.
+                </p>
+                <div class="flex gap-8 mt-12" style="flex-wrap:wrap">
+                  <button class="btn btn-danger btn-sm" data-open-modal="resetModal"><span data-icon="trash"></span> Xoá &amp; đặt lại dữ liệu</button>
+                  <a class="btn btn-ghost btn-sm" href="index.html">Về trang giới thiệu</a>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Reset modal --------------------------------------------------------- -->
+  <div class="modal" id="resetModal" aria-hidden="true">
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="resetTitle">
+      <div class="modal-head">
+        <div>
+          <h2 class="modal-title" id="resetTitle">Đặt lại dữ liệu học tập?</h2>
+          <p class="modal-sub">Toàn bộ phòng đã tạo, lịch học, ghi chú, thời gian học và số Sao sẽ bị xoá. Tài khoản vẫn được giữ nguyên.</p>
+        </div>
+        <button class="modal-close" data-close aria-label="Đóng"><span data-icon="x"></span></button>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" data-close>Giữ nguyên</button>
+        <button class="btn btn-danger" id="confirmReset">Xoá &amp; đặt lại</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/api/bootstrap.js"></script>
+  <script src="assets/js/data.js" defer></script>
+  <script src="assets/js/ui.js" defer></script>
+  <script src="assets/js/shell.js" defer></script>
+  <script src="assets/js/profile.js" defer></script>
+</body>
+</html>
