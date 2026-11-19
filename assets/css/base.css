@@ -75,8 +75,8 @@ h1, h2, h3, h4, h5, h6 {
   /* text */
   --text: #eeeeeb;
   --text-2: #959590;
-  --text-3: #7b7b76;
-  --text-4: #55544f;
+  --text-3: #8d8d86;
+  --text-4: #77766e;
   --text-on-accent: #0d180d;
 
   /* lines */
@@ -179,8 +179,8 @@ h1, h2, h3, h4, h5, h6 {
 
   --text: #191916;
   --text-2: #56554e;
-  --text-3: #75736b;
-  --text-4: #a09e96;
+  --text-3: #6d6b62;
+  --text-4: #8f8d84;
   --text-on-accent: #ffffff;
 
   --border: #e4e3dc;
@@ -547,6 +547,7 @@ h1, h2, h3, h4, h5, h6 {
   outline: none;
   border-color: var(--accent-border);
   background: var(--surface-2);
+  box-shadow: 0 0 0 3px var(--accent-dim);
 }
 .textarea { height: auto; min-height: 108px; padding: 11px 13px; resize: vertical; line-height: 1.6; }
 .select {

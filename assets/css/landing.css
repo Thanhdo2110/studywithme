@@ -736,14 +736,24 @@
   margin-top: 16px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-family: var(--mono);
-  font-size: 9.5px;
-  color: var(--text-4);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  flex-wrap: wrap;
+  gap: 6px;
 }
-.feature-meta .dot { width: 4px; height: 4px; box-shadow: none; }
+.feature-meta span {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 9px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-2);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+.feature-meta .dot { display: none; }
 
 /* --------------------------------------------------------------------------
    Data / code section
@@ -859,6 +869,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   background: var(--surface);
+  transition: border-color 0.25s var(--ease), transform 0.25s var(--ease);
   padding: 26px 24px 24px;
   overflow: hidden;
 }
@@ -888,6 +899,7 @@
   transition: color 0.25s;
 }
 .step-ico .ico { width: 20px; height: 20px; }
+.step-card:hover { border-color: var(--border-3); transform: translateY(-3px); }
 .step-card:hover .step-ico { color: var(--accent); }
 
 /* --------------------------------------------------------------------------
@@ -903,6 +915,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   background: var(--surface);
+  transition: border-color 0.25s var(--ease), transform 0.25s var(--ease);
   padding: 24px;
   display: flex;
   flex-direction: column;
@@ -917,6 +930,7 @@
   flex: 1;
 }
 .quote-card blockquote strong { color: var(--text); font-weight: 500; }
+.quote-card:hover { border-color: var(--border-3); transform: translateY(-3px); }
 .quote-person { display: flex; align-items: center; gap: 10px; padding-top: 16px; border-top: 1px solid var(--border); }
 .quote-person b { display: block; font-size: 12.5px; font-weight: 500; }
 .quote-person span { display: block; font-size: 11px; color: var(--text-3); }
@@ -1169,7 +1183,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   Light theme — landing
+   Light theme ï¿½ landing
    -------------------------------------------------------------------------- */
 
 [data-theme="light"] .hero-bg {
