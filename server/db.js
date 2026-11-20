@@ -304,8 +304,10 @@ function createPool(config = {}) {
 }
 
 async function initDatabase(pool, { seed = true } = {}) {
-  /* Migration nhẹ: thêm cột còn thiếu vào DB tạo từ schema cũ — chạy an toàn
-     lặp lại (IF NOT EXISTS) để fresh VPS và DB cũ cùng dùng một mã. */
+  await pool.query(SCHEMA_SQL);
+
+  /* Migration nhẹ sau khi schema đã có: thêm cột còn thiếu vào DB tạo từ
+     schema cũ — IF NOT EXISTS nên chạy lại vô hại. */
   const migrations = [
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS current_school TEXT NOT NULL DEFAULT ''",
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS gender TEXT NOT NULL DEFAULT ''",
@@ -316,7 +318,6 @@ async function initDatabase(pool, { seed = true } = {}) {
     });
   }
 
-  await pool.query(SCHEMA_SQL);
   if (seed) await seedGlobal(pool);
 }
 
