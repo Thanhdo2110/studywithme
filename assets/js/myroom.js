@@ -31,10 +31,11 @@
   }
 
   function subject(id) {
+    if (id === "mixed") return { name: "", color: "#8a8a85" };
     if (typeof id === "string" && id.startsWith("custom:")) {
       return { name: id.slice(7), color: "#959590" };
     }
-    return D.SUBJECT_MAP[id] || { name: "Khác", color: "#959590" };
+    return D.SUBJECT_MAP[id] || { name: "", color: "#8a8a85" };
   }
 
   function subjectValue(value) {
@@ -90,9 +91,6 @@
       return `
         <article class="room-card">
           <div class="room-card-top">
-            <span class="room-subject" style="color:${sub.color}">
-              <i style="background:${sub.color}"></i>${escapeHTML(sub.name)}
-            </span>
             <span class="tag">${icon(D.roomTypeIcon(room.type))} ${D.roomTypeLabel(room.type)}</span>
             <span class="myroom-role${host ? " myroom-role--host" : ""}">${host ? "CHỦ PHÒNG" : "THÀNH VIÊN"}</span>
           </div>
@@ -133,6 +131,15 @@
       link.addEventListener("click", (event) => event.preventDefault());
     });
 
+    /* Khách bấm "Vào phòng": mở bảng Đăng ký/Đăng nhập, xong vào thẳng phòng đó. */
+    if (isGuestAccount()) {
+      list.querySelectorAll('a[href^="room.html?room="]').forEach((link) => {
+        link.addEventListener("click", (event) => {
+          event.preventDefault();
+          window.UI.openAuth("register", { afterAuth: link.getAttribute("href") });
+        });
+      });
+    }
     list.querySelectorAll("[data-room-action]").forEach((button) => {
       button.addEventListener("click", () => handleAction(button));
     });
@@ -163,7 +170,6 @@
   function initCreateRoom() {
     const form = document.getElementById("createRoomForm");
     const picker = document.getElementById("typePicker");
-    const subjectSelect = document.getElementById("roomSubject");
     const hint = document.getElementById("roomTypeHint");
     let roomType = "community";
     const hints = {
@@ -172,7 +178,6 @@
       solo: "Phòng Cá nhân dành riêng cho bạn.",
     };
 
-    subjectSelect.value = "Toán";
     picker.querySelectorAll("[data-type]").forEach((button) => {
       button.addEventListener("click", () => {
         roomType = button.dataset.type;
@@ -196,7 +201,6 @@
       try {
         const room = await Store.createRoom({
           name,
-          subject: subjectValue(subjectSelect.value),
           type: roomType,
           topic: document.getElementById("roomTopic").value.trim(),
         });

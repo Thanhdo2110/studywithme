@@ -31,7 +31,7 @@
     {
       label: "Cộng đồng",
       items: [
-        { id: "shop", href: "profile.html#shop", icon: "sparkles", label: "Cửa hàng Sao" },
+        { id: "garden", href: "profile.html#garden", icon: "sprout", label: "Vườn học tập" },
       ],
     },
     {
@@ -46,14 +46,7 @@
   let page = "dashboard";
 
   function openRoomHref() {
-    try {
-      const account = window.Store && window.Store.account;
-      const accountId = account && account.id ? account.id : "guest";
-      const lastId = localStorage.getItem(`studywithme.lastRoom.${accountId}`);
-      return lastId ? `room.html?room=${encodeURIComponent(lastId)}` : "room.html";
-    } catch (err) {
-      return "room.html";
-    }
+    return "room.html"; /* Không ?room — trang phòng mở bảng chọn "Phòng đang mở", không tự join */
   }
 
   function accountLabel() {
@@ -72,7 +65,8 @@
     return `
       <div class="sidebar-top">
         <a class="brand" href="index.html" aria-label="StudyWithMe — trang chủ">
-          <img class="brand-logo" src="assets/img/logo-horizontal.svg" alt="StudyWithMe — Học cùng nhau">
+          <img class="brand-logo brand-logo--light" src="assets/img/logo-horizontal.png" alt="StudyWithMe — Học cùng nhau">
+          <img class="brand-logo brand-logo--dark" src="assets/img/logo-horizontal-dark.png" alt="StudyWithMe — Học cùng nhau">
         </a>
         <button class="sidebar-close" data-sidebar-close aria-label="Đóng menu">${icon("x")}</button>
       </div>
@@ -159,10 +153,10 @@
     hydrateIcons(topbar);
 
     bind();
-    // highlight shop anchor
-    if (page === "profile" && location.hash === "#shop") {
-      const shop = document.querySelector('.side-link[href="profile.html#shop"]');
-      if (shop) shop.classList.add("active");
+    // highlight garden anchor
+    if (page === "profile" && location.hash === "#garden") {
+      const garden = document.querySelector('.side-link[href="profile.html#garden"]');
+      if (garden) garden.classList.add("active");
     }
   }
 

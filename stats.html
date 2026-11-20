@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Thống kê học tập — StudyWithMe</title>
-  <meta name="description" content="Heatmap thói quen học tập, phân bố môn học, khung giờ tập trung và phiếu thành tích.">
-  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+  <meta name="description" content="Heatmap thói quen học tập, phân bố môn học, khung giờ tập trung và chuỗi ngày.">
+  <link rel="icon" type="image/png" href="assets/img/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -22,8 +22,8 @@
       }
     })();
   </script>
-  <link rel="stylesheet" href="assets/css/base.css">
-  <link rel="stylesheet" href="assets/css/app.css">
+  <link rel="stylesheet" href="assets/css/base.css?v=4">
+  <link rel="stylesheet" href="assets/css/app.css?v=4">
 </head>
 <body class="app-body-page" data-page="stats">
   <div class="app">
@@ -44,7 +44,6 @@
               <button data-range="180">6 tháng</button>
               <button data-range="365">1 năm</button>
             </div>
-            <button class="btn btn-soft btn-sm" id="exportBtn"><span data-icon="download"></span> Xuất phiếu thành tích</button>
           </div>
         </div>
 
@@ -98,9 +97,9 @@
 
             <div class="stats-two">
               <section class="panel chart-card">
-                <div class="panel-head"><h2>Phân bố theo môn</h2><span class="hint">Theo thời gian</span></div>
+                <div class="panel-head"><h2>14 ngày qua</h2><span class="hint">Phút học mỗi ngày</span></div>
                 <div class="panel-body">
-                  <div class="subject-bars" id="subjectBars"></div>
+                  <div class="recent-chart" id="recentChart"></div>
                 </div>
               </section>
 
@@ -118,39 +117,12 @@
 
           <!-- Right rail ------------------------------------------------ -->
           <aside class="stats-right">
-            <section class="panel" style="padding:14px">
-              <div class="report-card">
-                <div class="report-brand">
-                  <span>Phiếu thành tích · StudyWithMe</span>
-                  <span class="dot dot--live"></span>
-                </div>
-                <div class="report-big" id="reportMinutes">0p</div>
-                <div class="report-sub" id="reportSub">Chưa có dữ liệu hôm nay</div>
-                <div class="report-grid">
-                  <div class="report-item">
-                    <span>Study Stars</span>
-                    <b id="reportStars">+0</b>
-                  </div>
-                  <div class="report-item">
-                    <span>Chuỗi ngày</span>
-                    <b id="reportStreak">0 ngày</b>
-                  </div>
-                  <div class="report-item">
-                    <span>Việc hoàn thành</span>
-                    <b id="reportTasks">5 / 7</b>
-                  </div>
-                  <div class="report-item">
-                    <span>Môn nhiều nhất</span>
-                    <b id="reportFocus">Toán</b>
-                  </div>
-                </div>
-                <p class="report-quote" id="reportQuote">“Không cần hoàn hảo. Chỉ cần quay lại bàn học.”</p>
+            <section class="panel streak-panel">
+              <div class="panel-head">
+                <h2>Chuỗi ngày</h2>
+                <span class="hint">Mốc 7 ngày</span>
               </div>
-              <div class="report-actions">
-                <button class="btn btn-soft btn-sm grow" id="exportBtn2"><span data-icon="download"></span> Tải ảnh</button>
-                <a class="btn btn-ghost btn-sm" href="room.html">Học tiếp</a>
-              </div>
-              <p class="mono" style="font-size:8.5px;color:var(--text-4);margin-top:9px;letter-spacing:.05em" id="reportDate">—</p>
+              <div class="panel-body streak-widget" id="streakWidget"></div>
             </section>
 
             <section class="panel">
@@ -199,9 +171,9 @@
   <div class="heat-tooltip" id="heatTooltip"></div>
 
   <script src="/api/bootstrap.js"></script>
-  <script src="assets/js/data.js" defer></script>
-  <script src="assets/js/ui.js" defer></script>
-  <script src="assets/js/shell.js" defer></script>
-  <script src="assets/js/stats.js" defer></script>
+  <script src="assets/js/data.js?v=4" defer></script>
+  <script src="assets/js/ui.js?v=4" defer></script>
+  <script src="assets/js/shell.js?v=4" defer></script>
+  <script src="assets/js/stats.js?v=4" defer></script>
 </body>
 </html>

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Phòng học — StudyWithMe</title>
   <meta name="description" content="Phòng học tập trung StudyWithMe: đồng hồ Pomodoro, mục tiêu, tài liệu ghim, chat nhóm và danh sách người đang học.">
-  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+  <link rel="icon" type="image/png" href="assets/img/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -22,8 +22,8 @@
       }
     })();
   </script>
-  <link rel="stylesheet" href="assets/css/base.css">
-  <link rel="stylesheet" href="assets/css/app.css">
+  <link rel="stylesheet" href="assets/css/base.css?v=4">
+  <link rel="stylesheet" href="assets/css/app.css?v=4">
 </head>
 <body class="app-body-page" data-page="room">
   <div class="app">
@@ -127,7 +127,12 @@
                 <div class="timer-foot">
                   <span class="tf"><span data-icon="clock"></span> Hôm nay <b id="todayFocus">0p</b></span>
                   <span class="tf"><span data-icon="star"></span> Sao <b id="todayStars">+0</b></span>
-                  <span class="tf"><span data-icon="flame"></span> Chuỗi <b id="roomStreak">0 ngày</b></span>
+                  <span class="tf tf--streak" id="roomStreak"></span>
+                  <button class="tf tf--sound" id="musicOpen" type="button" data-open-modal="musicModal" aria-haspopup="dialog">
+                    <span data-icon="music"></span>
+                    <span id="musicLabel">Thanh âm tập trung</span>
+                    <i class="eq hidden" id="musicEq" aria-hidden="true"><b></b><b></b><b></b></i>
+                  </button>
                 </div>
 
                 <div class="heartbeat" id="heartbeat">
@@ -236,10 +241,38 @@
     </div>
   </div>
 
+  <!-- Focus sound modal -------------------------------------------------- -->
+  <div class="modal" id="musicModal" aria-hidden="true">
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="musicTitle">
+      <div class="modal-head">
+        <div>
+          <h2 class="modal-title" id="musicTitle">Thanh âm tập trung</h2>
+          <p class="modal-sub">Bốn bản nhạc nền nhé nhàng, phát lặp lại. Chỉ mình bạn nghe thấy.</p>
+        </div>
+        <button class="modal-close" data-close aria-label="Đóng"><span data-icon="x"></span></button>
+      </div>
+      <div class="modal-body">
+        <p class="music-now" id="musicStatus">Chọn một bài để phát</p>
+        <div class="music-list" id="musicList"></div>
+        <label class="music-vol" for="musicVolume">
+          <span data-icon="volume"></span>
+          <input class="music-range" id="musicVolume" type="range" min="0" max="100" step="5" value="45" aria-label="Âm lượng nhạc nền">
+          <b class="music-vol-value" id="musicVolumeValue">45%</b>
+        </label>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" data-close>Đóng</button>
+        <button class="btn btn-soft" id="musicStop" type="button"><span data-icon="volume-x"></span> Tắt nhạc</button>
+      </div>
+    </div>
+  </div>
+
   <script src="/api/bootstrap.js"></script>
-  <script src="assets/js/data.js" defer></script>
-  <script src="assets/js/ui.js" defer></script>
-  <script src="assets/js/shell.js" defer></script>
-  <script src="assets/js/room.js" defer></script>
+  <script src="assets/js/data.js?v=4" defer></script>
+  <script src="assets/js/ui.js?v=4" defer></script>
+  <script src="assets/js/shell.js?v=4" defer></script>
+  <script src="assets/js/room.js?v=4" defer></script>
+  <script src="assets/js/garden.js?v=4" defer></script>
+  <script src="assets/js/music.js?v=4" defer></script>
 </body>
 </html>

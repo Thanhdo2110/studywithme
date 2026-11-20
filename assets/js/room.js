@@ -8,7 +8,7 @@
 
   const D = window.DATA;
   const Store = window.Store;
-  const { icon, hydrateIcons, escapeHTML, avatarHTML, toast, copyText } = window.UI;
+  const { icon, hydrateIcons, escapeHTML, avatarHTML, toast, copyText, openModal } = window.UI;
 
   const RING_C = 2 * Math.PI * 108;
   const params = new URLSearchParams(location.search);
@@ -31,6 +31,7 @@
   let baseFocus = D.minutesForDay(new Date());
   let pendingFocus = 0;
   let focusHandle = null;
+  let memberPollHandle = null;
   let eventSource = null;
   let chatMessages = [];
   let lastSent = 0;
@@ -40,10 +41,11 @@
 
   const pad2 = (n) => String(n).padStart(2, "0");
   const subOf = (id) => {
+    if (id === "mixed") return { name: "", color: "#8a8a85" };
     if (typeof id === "string" && id.startsWith("custom:")) {
       return { name: id.slice(7), color: "#959590" };
     }
-    return D.SUBJECT_MAP[id] || { name: "Khác", color: "#959590" };
+    return D.SUBJECT_MAP[id] || { name: "", color: "#8a8a85" };
   };
   const nowClock = () => {
     const d = new Date();
@@ -68,18 +70,102 @@
   /* Resolve room                                                           */
   /* ---------------------------------------------------------------------- */
 
-  /* Không có ?room: mở phòng cộng đồng đang mở đầu tiên. */
-  /* Không có ?room: mở phòng gần đây, nếu không có thì mở phòng cộng đồng
-     đang LIVE đầu tiên ("Vào một phòng mẫu" từ trang chủ). */
-  function defaultRoomId() {
-    const accountId = Store.account && Store.account.id ? Store.account.id : "guest";
-    const lastId = localStorage.getItem(`studywithme.lastRoom.${accountId}`);
-    if (lastId) {
-      const last = (Store.state.rooms || []).find((room) => room.id === lastId);
-      if (last && (last.type !== "solo" || last.mine)) return last.id;
+  /* ---------------------------------------------------------------------- */
+  /* Biểu mẫu "Mở phòng cá nhân" — người dùng tự nhập tên và chọn môn          */
+  /* ---------------------------------------------------------------------- */
+
+  function renderSoloForm() {
+    const page = document.querySelector(".page--room");
+    if (!page) {
+      window.location.href = "dashboard.html";
+      return;
     }
-    const sample = (Store.state.rooms || []).find((room) => room.live && room.type === "community");
-    return sample ? sample.id : null;
+    const lastName = (Store.state.profile.name || "").trim().split(" ").slice(-1)[0] || "bạn";
+    page.innerHTML = `
+      <div class="room-picker solo-form">
+        <div class="picker-head">
+          <h1>Mở phòng cá nhân</h1>
+          <p>${icon("lock")} Không gian riêng của bạn — không ai làm phiền.</p>
+        </div>
+        <form id="soloForm" class="panel solo-panel" autocomplete="off">
+          <div class="panel-body solo-panel-body">
+            <div class="field">
+              <label for="soloName">Tên phòng</label>
+              <input class="input" id="soloName" maxlength="60" value="Phòng của ${escapeHTML(lastName)}">
+              <span class="field-hint">Ví dụ: Góc học tối, Phòng của ${escapeHTML(lastName)}…</span>
+            </div>
+          </div>
+          <div class="solo-foot">
+            <button type="submit" class="btn btn-primary btn-sm">${icon("arrow-right")} Mở phòng</button>
+            <a class="btn btn-ghost btn-sm" href="dashboard.html">Về Sảnh chính</a>
+          </div>
+        </form>
+      </div>`;
+
+    document.getElementById("soloForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const name = document.getElementById("soloName").value.trim() || `Phòng của ${lastName}`;
+      try {
+        const created = await Store.createRoom({ type: "solo", name });
+        window.location.href = `room.html?room=${encodeURIComponent(created.id)}`;
+      } catch (err) {
+        toast(err.message || "Không mở được phòng cá nhân.", "danger");
+      }
+    });
+  }
+
+  /* ---------------------------------------------------------------------- */
+  /* Bảng chọn "Phòng đang mở" — khi vào room.html không kèm ?room             */
+  /* ---------------------------------------------------------------------- */
+
+  function renderRoomPicker() {
+    const page = document.querySelector(".page--room");
+    if (!page) {
+      window.location.href = "dashboard.html";
+      return;
+    }
+    const subOf = (id) => (typeof id === "string" && id.startsWith("custom:"))
+      ? { name: id.slice(7), color: "#959590" }
+      : D.SUBJECT_MAP[id] || { name: "", color: "#8a8a85" };
+    const rooms = (Store.state.rooms || []).filter((r) => r.live && r.type !== "solo");
+    const cards = rooms
+      .map((room) => {
+        const sub = subOf(room.subject);
+        const full = !room.inRoom && !room.mine && room.joined >= room.capacity;
+        return `
+        <article class="room-card">
+          <div class="room-card-top">
+            ${room.type !== "community" ? `<span class="tag">${icon(D.roomTypeIcon(room.type))} ${D.roomTypeLabel(room.type)}</span>` : ""}
+            <span class="room-live"><i></i> LIVE</span>
+          </div>
+          <h3>${escapeHTML(room.name)}</h3>
+          <div class="room-host"><span>${escapeHTML(room.hostEmoji || "")}</span><span>Chủ phòng: ${escapeHTML(room.host)}</span></div>
+          <div class="room-capacity">
+            <div class="cap-top"><span>Chỗ ngồi</span><b>${room.joined} / ${room.capacity}</b></div>
+            <div class="bar"><span style="width:${Math.min(100, Math.round((room.joined / room.capacity) * 100))}%"></span></div>
+          </div>
+          <div class="room-foot">
+            ${full
+              ? '<button type="button" class="btn btn-soft btn-sm" disabled>Đã đầy</button>'
+              : `<a class="btn btn-accent btn-sm" href="room.html?room=${encodeURIComponent(room.id)}">Vào phòng ${icon("arrow-right")}</a>`}
+          </div>
+        </article>`;
+      })
+      .join("");
+
+    page.innerHTML = `
+      <div class="room-picker">
+        <div class="picker-head">
+          <h1>Phòng đang mở</h1>
+          <p>${icon("info")} Chọn một phòng để vào — bạn không bị nhảy tự động vào phòng nào.</p>
+        </div>
+        <div class="room-grid">${cards}</div>
+        ${rooms.length ? "" : '<p class="hint">Chưa có phòng nhóm nào đang LIVE. Hãy mở phòng cá nhân hoặc tạo phòng nhóm từ Sảnh chính.</p>'}
+        <div class="picker-actions">
+          <a class="btn btn-primary btn-sm" href="room.html?type=solo">${icon("lock")} Mở phòng cá nhân</a>
+          <a class="btn btn-ghost btn-sm" href="dashboard.html">Về Sảnh chính ${icon("arrow-right")}</a>
+        </div>
+      </div>`;
   }
 
   /* ---------------------------------------------------------------------- */
@@ -97,11 +183,7 @@
     pill.innerHTML = `${icon(D.roomTypeIcon(room.type))} <span>${D.roomTypeLabel(room.type)}</span>`;
     hydrateIcons(pill);
 
-    document.getElementById("roomSubjectMeta").innerHTML =
-      `<span style="display:inline-flex;align-items:center;gap:5px">
-        <i style="width:6px;height:6px;border-radius:2px;background:${sub.color};display:block"></i>
-        ${escapeHTML(sub.name)}
-      </span>`;
+    document.getElementById("roomSubjectMeta").innerHTML = "";
 
     document.getElementById("roomCapacityMeta").textContent = `${total} / ${room.capacity} chỗ`;
     document.getElementById("roomTopicMeta").textContent = room.topic || "Buổi học tập trung";
@@ -213,16 +295,90 @@
 
     wrap.innerHTML = members
       .map(
-        (m) => `<div class="member${m.me ? " me" : ""}">
+        (m, index) => `<div class="member${m.me ? " me" : ""}${m.seeded ? "" : " is-real"}" data-member="${escapeHTML(m.id)}" role="button" tabindex="0">
           ${m.me && frame ? `<span class="cosmetic-wrap cosmetic-wrap--inline ${frame}">${avatarHTML(m.emoji, m.name)}</span>` : avatarHTML(m.emoji, m.name)}
           <div class="m-info">
             <b>${escapeHTML(m.name)}${m.me ? "<em>BẠN</em>" : ""}${m.host && !m.me ? "<em>CHỦ PHÒNG</em>" : ""}</b>
             <span class="${m.status}"><i></i>${statusLabel[m.status]} · ${D.formatMinutes(m.minutes)}</span>
           </div>
-          <span class="seat">#${pad2(m.seat)}</span>
+          <span class="seat">#${pad2(index + 1)}</span>
         </div>`
       )
       .join("");
+  }
+
+  /* ---------------------------------------------------------------------- */
+  /* Thẻ hồ sơ thành viên (bấm avatar trong danh sách phòng)                 */
+  /* ---------------------------------------------------------------------- */
+
+  let memberModal = null;
+
+  async function fetchMemberProfile(userId) {
+    const res = await fetch(`/api/users/${encodeURIComponent(userId)}/profile`, { credentials: "same-origin" });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error((data && data.error) || "Không tải được hồ sơ thành viên.");
+    return data;
+  }
+
+  function pillText(examDate) {
+    const days = D.daysUntil(examDate);
+    return days === null ? "Chưa đặt ngày thi" : days === 0 ? "Hôm nay thi" : `D-${days}`;
+  }
+
+  function memberCardHTML(data) {
+    const g = data.garden || {};
+    const flowers = g.plant && Number(g.plantLevel) >= 6 ? Garden.flowerbedFor(g.plant, data.id) : "";
+    const petBadge = Garden.petBadgeFor(g.pet, Number(g.petLevel) || 0);
+    const pet = petBadge ? `<span class="study-pet study-pet--hero" title="Người bạn đồng hành" aria-hidden="true">${petBadge}</span>` : "";
+    const bio = data.bio || "Người này chưa viết dòng giới thiệu nào.";
+    return `<section class="panel profile-hero member-card">
+      ${flowers}
+      <span class="cosmetic-wrap">
+        ${avatarHTML(data.avatar, data.name, "avatar--xl")}
+        ${pet}
+      </span>
+      <h2>${escapeHTML(data.name)}</h2>
+      <p class="ph-sub">${escapeHTML(data.targetSchool || "Chưa đặt mục tiêu")}</p>
+      <div class="ph-pills">
+        <span class="pill">${escapeHTML(data.currentSchool || "Chưa cập nhật trường")}</span>
+        <span class="pill pill--accent">${data.grade ? `Lớp ${escapeHTML(String(data.grade))}` : "Chưa chọn lớp"}</span>
+        <span class="pill">${data.gender === "nu" ? "Nữ" : "Nam"}</span>
+      </div>
+      <p class="member-card-bio">${escapeHTML(bio)}</p>
+      <div class="profile-stats">
+        <div class="profile-stat"><b>${D.formatMinutes(Number(data.totalFocus) || 0)}</b><span>giờ học 90 ngày</span></div>
+        <div class="profile-stat"><b>${Number(data.stars || 0).toLocaleString("vi-VN")}</b><span>Study Stars</span></div>
+        <div class="profile-stat"><b>${Number(data.streak || 0)} ngày</b><span>chuỗi ngày</span></div>
+      </div>
+    </section>`;
+  }
+
+  function ensureMemberModal() {
+    if (memberModal) return memberModal;
+    memberModal = document.createElement("div");
+    memberModal.className = "modal";
+    memberModal.id = "memberCardModal";
+    memberModal.setAttribute("aria-hidden", "true");
+    memberModal.innerHTML = `
+      <div class="modal-panel member-modal" role="dialog" aria-modal="true" aria-label="Hồ sơ thành viên">
+        <button class="modal-close" data-close aria-label="Đóng">${icon("x")}</button>
+        <div id="memberCardBody"></div>
+      </div>`;
+    document.body.appendChild(memberModal);
+    return memberModal;
+  }
+
+  async function openMemberCard(member) {
+    const modal = ensureMemberModal();
+    const body = modal.querySelector("#memberCardBody");
+    body.innerHTML = `<section class="panel profile-hero member-card is-loading"><p class="member-card-loading">Đang mở hồ sơ…</p></section>`;
+    openModal(modal);
+    try {
+      const data = await fetchMemberProfile(member.id);
+      body.innerHTML = memberCardHTML(data);
+    } catch (err) {
+      body.innerHTML = `<section class="panel profile-hero member-card"><p class="member-card-loading">${escapeHTML(err.message || "Không tải được hồ sơ.")}</p></section>`;
+    }
   }
 
   /* ---------------------------------------------------------------------- */
@@ -247,7 +403,8 @@
             <span class="box"></span>
             <span class="check-text">${escapeHTML(t.text)}</span>
           </label>
-          <span class="tag" style="color:${s.color};border-color:${s.color}44">${s.name}</span>
+          ${s.name ? `<span class="tag" style="color:${s.color};border-color:${s.color}44">${escapeHTML(s.name)}</span>` : ""}
+
         </div>`;
       })
       .join("");
@@ -382,7 +539,14 @@
     document.getElementById("todayFocus").textContent = D.formatMinutes(focusMin);
     document.getElementById("todayStars").textContent = `+${Math.floor(focusSeconds / 60)}`;
     const roomStreak = document.getElementById("roomStreak");
-    if (roomStreak) roomStreak.textContent = `${Store.state.profile.streak || 0} ngày`;
+    if (roomStreak) {
+      const streak = Store.state.profile.streak || 0;
+      /* renderTimer chạy mỗi giây — chỉ vẽ lại khi chuỗi thay đổi */
+      if (roomStreak.dataset.streak !== String(streak)) {
+        roomStreak.dataset.streak = String(streak);
+        roomStreak.innerHTML = `${window.UI.streakMascot("streak-mascot--sm")}<b>${streak} ngày streak</b>${window.UI.streakWeek(streak, { compact: true })}`;
+      }
+    }
 
     if (timer.running) {
       document.title = `${timerDisplayValue()} · ${room.name}`;
@@ -629,10 +793,25 @@
     eventSource.addEventListener("message", (event) => {
       try {
         const msg = JSON.parse(event.data);
-        if (msg.userId && Store.account && msg.userId === Store.account.id) return;
+        /* Broadcast chung của server mang me:false — tự đánh dấu tin của mình
+           (để hiển thị bên phải, kể cả khi mở phòng ở tab khác). */
+        if (msg.userId && Store.account && msg.userId === Store.account.id) msg.me = true;
         pushMessage(msg);
       } catch (err) {
         /* bỏ qua sự kiện hỏng */
+      }
+    });
+
+    /* Bảng ghim tài liệu cập nhật realtime cho mọi thành viên. */
+    eventSource.addEventListener("docs", (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (Array.isArray(data.docs) && Store.state.docsByRoom) {
+          Store.state.docsByRoom[room.id] = data.docs;
+          renderDocs();
+        }
+      } catch (err) {
+        /* bỏ qua */
       }
     });
 
@@ -842,6 +1021,26 @@
       col.scrollIntoView({ behavior: "smooth", block: "start" });
     });
 
+    /* Bấm vào một thành viên để mở thẻ hồ sơ của họ. */
+    document.getElementById("membersList").addEventListener("click", (e) => {
+      const row = e.target.closest(".member");
+      if (!row || !row.dataset.member) return;
+      const m = members.find((item) => item.id === row.dataset.member);
+      if (!m) return;
+      if (m.seeded) {
+        toast("Bạn học mẫu này trong phòng chưa có hồ sơ thật.");
+        return;
+      }
+      openMemberCard(m);
+    });
+    document.getElementById("membersList").addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      const row = e.target.closest(".member");
+      if (!row || !row.dataset.member) return;
+      const m = members.find((item) => item.id === row.dataset.member);
+      if (m && !m.seeded) openMemberCard(m);
+    });
+
     document.querySelectorAll("[data-scroll]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const target = document.getElementById(btn.dataset.scroll);
@@ -928,30 +1127,34 @@
     const typeParam = params.get("type");
     let roomId = params.get("room");
 
+    /* ?type=solo: hiện biểu mẫu để người dùng tự đặt tên phòng và chọn môn
+       (trước đây tự tạo luôn phòng “Phòng của …” môn Toán). */
     if (!roomId && typeParam === "solo") {
-      try {
-        const created = await Store.createRoom({
-          type: "solo",
-          subject: "toan",
-          name: `Phòng của ${Store.state.profile.name.split(" ").slice(-1)[0]}`,
-          topic: "Không gian riêng — không ai làm phiền",
-        });
-        roomId = created.id;
-        history.replaceState(null, "", `room.html?room=${encodeURIComponent(created.id)}`);
-      } catch (err) {
-        toast(err.message || "Không mở được phòng cá nhân.", "danger");
-        setTimeout(() => (window.location.href = "dashboard.html"), 1100);
-        return;
-      }
+      renderSoloForm();
+      return;
     }
 
+    /* Không có ?room: đang có phiên phòng (presence tươi, hoặc phòng vừa ở
+       mà không hề out — beacon đã bị bỏ khi điều hướng giữa các trang phòng)
+       thì mở đúng phòng đó; không thì hiện bảng chọn "Phòng đang mở" —
+       danh sách phòng cộng đồng, không tự join. */
     if (!roomId) {
-      roomId = defaultRoomId();
-      if (!roomId) {
-        toast("Chưa có phòng nào để mở. Hãy tạo một phòng mới.", "warning");
-        window.location.replace("dashboard.html");
+      let active = (Store.state.rooms || []).find((r) => r.inRoom);
+      if (!active) {
+        try {
+          const accountId = Store.account && Store.account.id ? Store.account.id : "guest";
+          const lastId = localStorage.getItem(`studywithme.lastRoom.${accountId}`);
+          if (lastId) active = (Store.state.rooms || []).find((r) => r.id === lastId && (r.type !== "solo" || r.mine));
+        } catch (err) {
+          /* localStorage bị chặn — chỉ còn đường vào bảng chọn */
+        }
+      }
+      if (active) {
+        window.location.replace(`room.html?room=${encodeURIComponent(active.id)}`);
         return;
       }
+      renderRoomPicker();
+      return;
     }
 
     /* Luôn mở đúng phòng trong ?room — kể cả phòng Nhóm mình chưa tham gia
@@ -1007,11 +1210,35 @@
 
     focusHandle = setInterval(() => flushFocus(), 30000);
 
+    /* Poll danh sách thành viên 15s/lần: đóng tab / mất mạng của ai đó sẽ
+       biến mất khỏi danh sách trong tối đa ~15–20s, không cần load lại trang. */
+    let memberSig = "";
+    memberPollHandle = setInterval(async () => {
+      try {
+        const data = await Store.pollRoom(room.id);
+        const next = data.members || [];
+        const sig = JSON.stringify(next.map((m) => [m.id, m.status, m.name, m.me, m.host]));
+        if (sig === memberSig) return;
+        memberSig = sig;
+        members = next;
+        renderMembers();
+        document.getElementById("memberCount").textContent = `${members.length} / ${room.capacity}`;
+        document.getElementById("roomCapacityMeta").textContent = `${members.length} / ${room.capacity} chỗ`;
+      } catch (err) {
+        /* Mạng chập chờn — nhịp poll sau thử lại */
+      }
+    }, 15000);
+
+    /* Không tự out khi rời trang — tư cách thành viên chỉ mất khi bấm
+       "Rời phòng", hoặc mất kết nối thật sự (phòng tự trống sau ~2 phút
+       nhờ cửa sổ hiện diện phía server). Chủ phòng giữ nguyên tư cách. */
+
     // Ghi nhận phần giờ học còn lại khi rời trang
     window.addEventListener("beforeunload", () => {
       stopTicking();
       if (hbHandle) clearInterval(hbHandle);
       if (focusHandle) clearInterval(focusHandle);
+      if (memberPollHandle) clearInterval(memberPollHandle);
       if (eventSource) eventSource.close();
       flushFocus(true);
     });

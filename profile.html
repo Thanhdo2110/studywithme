@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hồ sơ &amp; cài đặt — StudyWithMe</title>
   <meta name="description" content="Cấu hình mục tiêu thi, avatar, màu nhấn, nhắc nhở và đổi Study Stars.">
-  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+  <link rel="icon" type="image/png" href="assets/img/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -22,8 +22,8 @@
       }
     })();
   </script>
-  <link rel="stylesheet" href="assets/css/base.css">
-  <link rel="stylesheet" href="assets/css/app.css">
+  <link rel="stylesheet" href="assets/css/base.css?v=4">
+  <link rel="stylesheet" href="assets/css/app.css?v=4">
 </head>
 <body class="app-body-page" data-page="profile">
   <div class="app">
@@ -47,7 +47,7 @@
         <div class="profile-grid">
           <!-- Left ------------------------------------------------------ -->
           <aside class="profile-left">
-            <section class="panel profile-hero">
+            <section class="panel profile-hero" id="profileHero">
               <div id="heroAvatar"></div>
               <h2 id="heroName">Khách</h2>
               <p class="ph-sub" id="heroSchool">Chưa đặt mục tiêu</p>
@@ -64,7 +64,7 @@
               <div class="panel-head"><h2>Avatar</h2><span class="hint">Chọn nhân vật đại diện</span></div>
               <div class="panel-body">
                 <div class="avatar-grid" id="avatarGrid"></div>
-                <p class="field-hint mt-12">Avatar hiển thị trong phòng học và phiếu thành tích.</p>
+                <p class="field-hint mt-12">Avatar hiển thị trong phòng học và hồ sơ của bạn.</p>
               </div>
             </section>
 
@@ -115,6 +115,18 @@
                   <div class="field">
                     <label for="pGrade">Khối lớp</label>
                     <input class="input" id="pGrade" type="text" maxlength="20" placeholder="VD: Lớp 12">
+                  </div>
+
+                  <div class="field">
+                    <label for="pCurrentSchool">Trường học hiện tại</label>
+                    <input class="input" id="pCurrentSchool" maxlength="70" placeholder="VD: THPT Chu Văn An">
+                  </div>
+                  <div class="field">
+                    <label for="pGender">Giới tính</label>
+                    <select class="select" id="pGender">
+                      <option value="nam">Nam</option>
+                      <option value="nu">Nữ</option>
+                    </select>
                   </div>
 
                   <div class="field">
@@ -177,26 +189,21 @@
                   </div>
                   <label class="switch"><input type="checkbox" id="setHeartbeat"><span class="track"></span></label>
                 </div>
-                <div class="setting-row">
-                  <div>
-                    <b>Âm thanh giao diện</b>
-                    <span>Tiếng chuông kết thúc ca và âm thanh Lo-fi.</span>
-                  </div>
-                  <label class="switch"><input type="checkbox" id="setSounds"><span class="track"></span></label>
-                </div>
               </div>
             </section>
 
-            <section class="panel" id="shop">
+            <section class="panel" id="garden">
               <div class="panel-head">
-                <h2>Cửa hàng Sao</h2>
-                <span class="hint" id="shopStars">0 ★</span>
+                <h2>Vườn học tập</h2>
+                <span class="hint" id="gardenStars">0 ★</span>
               </div>
-              <div class="panel-body">
-                <p style="font-size:11.5px;color:var(--text-3);line-height:1.65;margin-bottom:12px">
-                  Mỗi phút tập trung hợp lệ nhận 1 Study Star. Đổi Sao để mở khoá avatar, thú cưng và khung trang trí.
+              <div class="panel-body garden-body">
+                <p class="garden-lead">
+                  Mỗi phút tập trung hợp lệ nhận 1 Study Star. Chọn một cây trồng và một thú cưng,
+                  rồi dùng Sao để tưới nước hoặc cho ăn — mỗi lần chăm sóc, cây mọc thêm một mốc:
+                  hạt, nảy mầm, thân, phân cành, tán lá rồi kết quả.
                 </p>
-                <div class="shop-grid" id="shopGrid"></div>
+                <div id="gardenPanel"></div>
               </div>
             </section>
 
@@ -250,9 +257,10 @@
   </div>
 
   <script src="/api/bootstrap.js"></script>
-  <script src="assets/js/data.js" defer></script>
-  <script src="assets/js/ui.js" defer></script>
-  <script src="assets/js/shell.js" defer></script>
-  <script src="assets/js/profile.js" defer></script>
+  <script src="assets/js/data.js?v=4" defer></script>
+  <script src="assets/js/ui.js?v=4" defer></script>
+  <script src="assets/js/shell.js?v=4" defer></script>
+  <script src="assets/js/profile.js?v=4" defer></script>
+  <script src="assets/js/garden.js?v=4" defer></script>
 </body>
 </html>

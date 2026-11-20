@@ -7,7 +7,7 @@
 
   const D = window.DATA;
   const Store = window.Store;
-  const { icon, escapeHTML, avatarHTML, toast } = window.UI;
+  const { escapeHTML, avatarHTML, toast } = window.UI;
 
   const AVATARS = ["🦊", "🐼", "🐯", "🐸", "🐧", "🦉", "🐨", "🐰", "🐙", "🦄", "🌙", "⭐"];
 
@@ -20,10 +20,6 @@
   function displayGrade(value) {
     const grade = normalizeGrade(value);
     return grade ? `Lớp ${grade}` : "Chưa chọn lớp";
-  }
-
-  function shopItems() {
-    return (Store.shop && Store.shop.length ? Store.shop : D.SHOP) || [];
   }
 
   function applyAccent(accent) {
@@ -68,18 +64,31 @@
     const owned = Store.state.owned || [];
     const frame = ["neon", "winter"].find((id) => owned.includes(id)) || "";
 
+    const gardenPet = window.Garden ? window.Garden.heroPet() : "";
+    const gardenBed = window.Garden ? window.Garden.heroFlowerbed() : "";
+    const petEmoji = gardenPet || (owned.includes("cat") ? "🐱" : "");
+
     $("heroAvatar").innerHTML = `<span class="cosmetic-wrap${frame ? ` ${frame}` : ""}">
       ${avatarHTML(p.avatar, p.name, "avatar--xl")}
-      ${owned.includes("cat") ? `<span class="study-pet study-pet--hero" title="Mèo đồng hành" aria-hidden="true">🐱</span>` : ""}
+      ${petEmoji ? `<span class="study-pet study-pet--hero" title="Người bạn đồng hành" aria-hidden="true">${petEmoji}</span>` : ""}
     </span>`;
+
+    /* Nền hoa toàn khung hero khi cây trồng đã trọn vẹn — chèn vào đầu khung
+       (trước khi render lại cần dọn lớp cũ để không chồng lớp). */
+    const heroCard = document.getElementById("profileHero");
+    if (heroCard) {
+      const oldBed = heroCard.querySelector(".hero-flowerbed");
+      if (oldBed) oldBed.remove();
+      if (gardenBed) heroCard.insertAdjacentHTML("afterbegin", gardenBed);
+    }
     $("heroName").textContent = p.name;
     $("heroSchool").textContent = p.targetSchool || "Chưa đặt mục tiêu";
     $("heroBio").textContent = p.bio || "Thêm một dòng giới thiệu để bạn học cùng biết bạn đang cày môn gì.";
 
     $("heroPills").innerHTML = `
+      <span class="pill">${escapeHTML(p.currentSchool || "Chưa cập nhật trường")}</span>
       <span class="pill pill--accent">${escapeHTML(displayGrade(p.grade))}</span>
-      <span class="pill">${escapeHTML(p.exam)}</span>
-      <span class="pill">${days === null ? "Chưa đặt ngày thi" : days === 0 ? "Hôm nay thi" : `D-${days}`}</span>`;
+      <span class="pill">${p.gender === "nu" ? "Nữ" : "Nam"}</span>`;
 
     $("heroHours").textContent = D.formatMinutes(Store.state.totalFocus || 0);
     $("heroStars").textContent = Number(p.stars || 0).toLocaleString("vi-VN");
@@ -118,9 +127,11 @@
     $("pName").value = p.name || "";
     const grade = normalizeGrade(p.grade);
     $("pGrade").value = grade ? `Lớp ${grade}` : "";
+    $("pSchool").value = p.targetSchool || "";
     $("pExam").value = p.exam || "";
     $("pDate").value = p.examDate || "";
-    $("pSchool").value = p.targetSchool || "";
+    $("pCurrentSchool").value = p.currentSchool || "";
+    $("pGender").value = p.gender || "";
     $("pGoal").value = String(p.goalHours || 4);
     $("pStars").value = Number(p.stars || 0).toLocaleString("vi-VN");
     $("pBio").value = p.bio || "";
@@ -135,14 +146,14 @@
       return;
     }
 
-    const date = $("pDate").value.trim();
-
     Object.assign(Store.state.profile, {
       name,
       grade: normalizeGrade($("pGrade").value),
       exam: $("pExam").value.trim(),
-      examDate: date,
+      examDate: $("pDate").value.trim(),
       targetSchool: $("pSchool").value.trim(),
+      currentSchool: $("pCurrentSchool").value.trim(),
+      gender: $("pGender").value,
       goalHours: Number($("pGoal").value) || 4,
       bio: $("pBio").value.trim(),
     });
@@ -162,7 +173,6 @@
     const map = {
       setReminders: "reminders",
       setHeartbeat: "heartbeat",
-      setSounds: "sounds",
     };
 
     Object.entries(map).forEach(([elId, key]) => {
@@ -177,63 +187,6 @@
           toast("Heartbeat đã tắt. Phiên học sẽ không được xác thực.", "warning");
         } else {
           toast(el.checked ? "Đã bật tuỳ chọn." : "Đã tắt tuỳ chọn.");
-        }
-      });
-    });
-  }
-
-  /* ---------------------------------------------------------------------- */
-  /* Shop                                                                    */
-  /* ---------------------------------------------------------------------- */
-
-  function renderShop() {
-    const p = Store.state.profile;
-    const owned = Store.state.owned || [];
-    const grid = $("shopGrid");
-    const items = shopItems();
-
-    $("shopStars").textContent = `${Number(p.stars || 0).toLocaleString("vi-VN")} ★`;
-    $("pStars").value = Number(p.stars || 0).toLocaleString("vi-VN");
-
-    grid.innerHTML = items.map((item) => {
-      const has = owned.includes(item.id);
-      const canBuy = p.stars >= item.price;
-      const label = has ? "Đã mở khoá" : canBuy ? "Đổi Sao" : "Thiếu Sao";
-      return `
-        <div class="shop-item${has ? " owned" : ""}">
-          <span class="si-icon" aria-hidden="true">${item.icon}</span>
-          <b>${escapeHTML(item.name)}</b>
-          <span style="font-size:10px;color:var(--text-3);line-height:1.4">${escapeHTML(item.desc)}</span>
-          <span class="price">${icon("star")} ${has ? "Đã sở hữu" : item.price.toLocaleString("vi-VN")}</span>
-          <button type="button" class="btn ${has ? "btn-ghost" : "btn-soft"} btn-sm"
-            data-buy="${item.id}" ${has || !canBuy ? "disabled" : ""}>${label}</button>
-        </div>`;
-    }).join("");
-
-    grid.querySelectorAll("[data-buy]").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const item = items.find((i) => i.id === btn.dataset.buy);
-        if (!item) return;
-
-        if ((Store.state.owned || []).includes(item.id)) {
-          toast("Bạn đã sở hữu vật phẩm này.");
-          return;
-        }
-        if (Store.state.profile.stars < item.price) {
-          toast(`Cần thêm ${(item.price - Store.state.profile.stars).toLocaleString("vi-VN")} ★ để mở khoá.`, "warning");
-          return;
-        }
-
-        btn.disabled = true;
-        try {
-          await Store.buy(item.id);
-          renderHero();
-          renderShop();
-          if (window.Shell) window.Shell.refresh();
-          toast(`Đã mở khoá ${item.name}!`);
-        } catch (err) {
-          toast(err.message || "Không mua được vật phẩm này.", "danger");
-          renderShop();
         }
       });
     });
@@ -289,7 +242,6 @@
     initTheme();
     populateForm();
     initSwitches();
-    renderShop();
     initAccount();
 
     $("profileForm").addEventListener("submit", saveProfile);

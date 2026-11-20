@@ -55,11 +55,13 @@
     label.title = weekOffset === 0 ? "Tuần này" : weekOffset > 0 ? `+${weekOffset} tuần` : `${weekOffset} tuần`;
   }
 
-  function renderHours() {
+  function renderHours(dayStart, dayEnd) {
     const wrap = document.getElementById("tlHours");
     let html = "";
-    for (let h = 6; h <= 24; h += 2) {
-      const top = ((h * 60 - D.DAY_START) / 60) * D.HOUR_H;
+    const firstHour = Math.floor(dayStart / 60);
+    const lastHour = Math.min(24, Math.ceil(dayEnd / 60));
+    for (let h = firstHour; h <= lastHour; h += 2) {
+      const top = ((h * 60 - dayStart) / 60) * D.HOUR_H;
       html += `<span class="tl-hour-label" style="top:${top}px">${D.pad(h)}:00</span>`;
     }
     wrap.innerHTML = html;
@@ -67,7 +69,17 @@
 
   function renderTimeline() {
     renderHeader();
-    renderHours();
+
+    /* Khung giờ tự co giãn theo ca sớm nhất/muộn nhất trong tuần —
+       học sinh dậy từ 4h sáng cũng thấy được ca của mình. */
+    const starts = Store.state.schedule.map((s) => D.clockToMinutes(s.start));
+    const ends = Store.state.schedule.map((s) => D.clockToMinutes(s.start) + Number(s.duration || 0));
+    const dayStart = starts.length ? Math.min(D.DAY_START, Math.floor(Math.min(...starts) / 60) * 60) : D.DAY_START;
+    const dayEnd = ends.length ? Math.max(D.DAY_END, Math.ceil(Math.max(...ends) / 60) * 60) : D.DAY_END;
+    renderHours(dayStart, dayEnd);
+
+    const body = document.querySelector(".tl-body");
+    if (body) body.style.height = `${((dayEnd - dayStart) / 60) * D.HOUR_H}px`;
 
     const dates = D.weekDates(weekOffset);
     const today = D.todayISO;
@@ -84,7 +96,7 @@
           .map((item) => {
             const sub = subOf(item.subject);
             const start = D.clockToMinutes(item.start);
-            const top = ((start - D.DAY_START) / 60) * D.HOUR_H;
+            const top = ((start - dayStart) / 60) * D.HOUR_H;
             const height = Math.max(24, (item.duration / 60) * D.HOUR_H - 3);
             const end = start + item.duration;
             return `<button type="button" class="tl-block" data-block="${item.id}"
@@ -100,8 +112,8 @@
         if (isToday) {
           const now = new Date();
           const mins = now.getHours() * 60 + now.getMinutes();
-          if (mins >= D.DAY_START && mins <= D.DAY_END) {
-            const top = ((mins - D.DAY_START) / 60) * D.HOUR_H;
+          if (mins >= dayStart && mins <= dayEnd) {
+            const top = ((mins - dayStart) / 60) * D.HOUR_H;
             blocks += `<div class="tl-now" style="top:${top}px" title="Bây giờ"></div>`;
           }
         }

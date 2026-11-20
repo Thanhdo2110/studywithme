@@ -28,6 +28,32 @@ const SHOP_ITEMS = [
   { id: "neon", name: "Khung Neon", icon: "✨", price: 250, desc: "Viền phát sáng dịu mắt" },
 ];
 
+/* Vườn học tập — cây trồng & thú cưng nuôi bằng Study Star.
+   Giá trị id phải khớp với danh mục hiển thị ở assets/js/garden.js. */
+const GARDEN_MAX_LEVEL = 6;
+/* Chi phí ★ cho từng mức. Thú cưng đắt gấp 3 lần cây trồng —
+   nuôi thú là mục tiêu dài hạn, tạo thử thách cho người chơi. */
+const GARDEN_COSTS = [30, 60, 100, 150, 220];
+const GARDEN_PET_COSTS = GARDEN_COSTS.map((c) => c * 3); // [90, 180, 300, 450, 660]
+const GARDEN_PLANTS = [
+  { id: "huong-duong", name: "Hướng dương" },
+  { id: "hong", name: "Hoa hồng" },
+  { id: "anh-dao", name: "Anh đào" },
+  { id: "xuong-rong", name: "Xương rồng" },
+  { id: "tre", name: "Tre xanh" },
+];
+const GARDEN_PETS = [
+  { id: "meo", name: "Mèo con" },
+  { id: "cun", name: "Cún con" },
+  { id: "tho", name: "Thỏ trắng" },
+  { id: "cu-meo", name: "Cú mèo" },
+  { id: "rong", name: "Rồng con" },
+];
+
+function gardenCatalog() {
+  return { plants: GARDEN_PLANTS, pets: GARDEN_PETS, costs: GARDEN_COSTS, petCosts: GARDEN_PET_COSTS, maxLevel: GARDEN_MAX_LEVEL };
+}
+
 function pad(n) {
   return String(n).padStart(2, "0");
 }
@@ -190,6 +216,12 @@ module.exports = {
   ROOM_TYPES,
   MEMBER_POOL,
   SHOP_ITEMS,
+  GARDEN_MAX_LEVEL,
+  GARDEN_COSTS,
+  GARDEN_PET_COSTS,
+  GARDEN_PLANTS,
+  GARDEN_PETS,
+  gardenCatalog,
   SUBJECT_WEIGHTS,
   HOUR_WEIGHTS,
   pad,

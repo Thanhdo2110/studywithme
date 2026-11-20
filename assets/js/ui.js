@@ -54,6 +54,9 @@
     moon: '<path d="M21 12.9A9 9 0 1 1 11.1 3a7 7 0 0 0 9.9 9.9z"/>',
     sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"/>',
     volume: '<path d="M11 5 6 9H2.5v6H6l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/>',
+    music: '<path d="M9.5 18V5.5l10-2v12"/><circle cx="6.9" cy="18" r="2.6"/><circle cx="16.9" cy="15.5" r="2.6"/>',
+    sprout: '<path d="M12 21v-8.5"/><path d="M12 12.5c0-4-2.7-6.7-6.6-6.7 0 4 2.7 6.7 6.6 6.7z"/><path d="M12 10.6c0-4 2.7-6.7 6.6-6.7 0 4-2.7 6.7-6.6 6.7z"/>',
+    droplet: '<path d="M12 3.4c3.3 3.7 5.6 6.5 5.6 9.2a5.6 5.6 0 0 1-11.2 0c0-2.7 2.3-5.5 5.6-9.2z"/>',
     heart: '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/>',
     alert: '<path d="M10.3 3.2 2.5 17a2 2 0 0 0 1.7 3h15.6a2 2 0 0 0 1.7-3L13.7 3.2a2 2 0 0 0-3.4 0z"/><path d="M12 9v4.5"/><circle cx="12" cy="17" r=".6" fill="currentColor"/>',
     more: '<circle cx="5" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.3" fill="currentColor" stroke="none"/>',
@@ -205,7 +208,8 @@
       <div class="modal-panel auth-panel" role="dialog" aria-modal="true" aria-labelledby="authTitle">
         <button class="modal-close" data-close aria-label="Đóng">${icon("x")}</button>
         <div class="auth-brand">
-          <img class="brand-logo" src="assets/img/logo-horizontal.svg" alt="StudyWithMe — Học cùng nhau">
+          <img class="brand-logo brand-logo--light" src="assets/img/logo-horizontal.png" alt="StudyWithMe — Học cùng nhau">
+          <img class="brand-logo brand-logo--dark" src="assets/img/logo-horizontal-dark.png" alt="StudyWithMe — Học cùng nhau">
           <h3 id="authTitle">Vào học cùng StudyWithMe</h3>
           <p>Không webcam, không ồn ào. Chỉ có bạn, kế hoạch học và những người cùng tiến.</p>
         </div>
@@ -279,7 +283,9 @@
       if (!email) return fail("Hãy nhập email của bạn.");
       if (password.length < 6) return fail("Mật khẩu cần ít nhất 6 ký tự.");
       if (mode === "register" && name.length < 2) return fail("Hãy nhập họ và tên của bạn.");
-      if (!window.Store || !Store.online) return fail("Không kết nối được máy chủ. Hãy chạy npm start rồi mở lại trang.");
+      /* Không chặn theo Store.offline: chế độ offline chỉ là bootstrap trống
+         (phiên cũ hết hạn) chứ máy chủ vẫn chạy — login/register vẫn hoạt động,
+         lỗi (nếu có) sẽ do api() trả về ở catch dưới. */
 
       submitBtn.disabled = true;
       try {
@@ -290,7 +296,11 @@
            modal đóng mà phiên chưa kịp cập nhật. */
         wrap.dataset.authDone = "1";
         closeModal(wrap);
-        setTimeout(() => (window.location.href = (data && data.redirect) || "dashboard.html"), 420);
+        /* Khách vào từ một phòng (?room=…) hoặc vừa bấm "Vào phòng" thì đi thẳng
+           vào phòng đó, không quay ra Sảnh chính. */
+        const next = afterAuthUrl || (currentRoomUrl() ? location.href : (data && data.redirect) || "dashboard.html");
+        afterAuthUrl = null;
+        setTimeout(() => (window.location.href = next), 420);
       } catch (err) {
         fail(err.message || "Không đăng nhập được. Vui lòng thử lại.");
       } finally {
@@ -308,12 +318,21 @@
     });
   }
 
+  /* Đích quay lại sau khi đăng nhập/đăng ký — ví dụ phòng khách vừa bấm "Vào phòng". */
+  let afterAuthUrl = null;
+
+  /* Đang đứng ngay trong một phòng học (?room=…) thì xác thực xong ở lại phòng đó. */
+  function currentRoomUrl() {
+    return /(^|\/)room\.html$/.test(location.pathname) && new URLSearchParams(location.search).get("room");
+  }
+
   /* Mở bảng đăng nhập/đăng ký chủ động — guests bị chặn tạo/vào phòng sẽ
      được đưa thẳng vào tab Đăng ký. */
-  function openAuth(mode) {
+  function openAuth(mode, options) {
     injectAuthModal();
     const modal = document.getElementById("authModal");
     if (!modal) return;
+    afterAuthUrl = (options && options.afterAuth) || null;
     if (mode === "register") {
       const tab = modal.querySelector('[data-auth-mode="register"]');
       if (tab) tab.click();
@@ -365,9 +384,66 @@
     initHeaderScroll();
   });
 
+  /* --------------------------------------------------------------------------
+     Chuỗi ngày — mascot ngọn lửa và dải 7 ngày
+     -------------------------------------------------------------------------- */
+
+  function streakMascot(extraClass) {
+    return `<svg class="streak-mascot${extraClass ? ` ${extraClass}` : ""}" viewBox="0 0 64 84" aria-hidden="true" focusable="false">
+      <path d="M32 2c2.2 8.4 9.5 12.5 9.5 22.4 0 8.2-4.2 13.9-9.5 13.9s-9.5-5.7-9.5-13.9C22.5 14.5 29.8 10.4 32 2z" fill="#f2502b"/>
+      <path d="M32 13.5c1.4 5.4 5.8 8.4 5.8 15 0 5.6-2.6 9.4-5.8 9.4s-5.8-3.8-5.8-9.4c0-6.6 4.4-9.6 5.8-15z" fill="#ff9a3c"/>
+      <ellipse cx="32" cy="30.5" rx="3.6" ry="5.2" fill="#ffe96b"/>
+      <rect x="13" y="33" width="38" height="45" rx="16" fill="#7ed957"/>
+      <rect x="15" y="41" width="34" height="5.5" rx="2" fill="#f2f5ec"/>
+      <rect x="19" y="70" width="11" height="10" rx="5" fill="#7ed957"/>
+      <rect x="34" y="70" width="11" height="10" rx="5" fill="#7ed957"/>
+      <rect x="6.5" y="50" width="7.5" height="11" rx="3.8" fill="#7ed957"/>
+      <rect x="50" y="50" width="7.5" height="11" rx="3.8" fill="#7ed957"/>
+      <circle cx="26" cy="53" r="3.4" fill="#243021"/>
+      <circle cx="38" cy="53" r="3.4" fill="#243021"/>
+      <path d="M29 61.5c1.7 1.9 4.3 1.9 6 0" stroke="#243021" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+    </svg>`;
+  }
+
+  /* completed: số ngày đã giữ trong chuỗi hiện tại (dải luôn đủ 7 ô) */
+  function streakWeek(completed, opts) {
+    const done = Math.max(0, Math.min(7, Number(completed) || 0));
+    const compact = Boolean(opts && opts.compact);
+    const cells = Array.from({ length: 7 }, (_, i) => {
+      const n = i + 1;
+      const on = n <= done;
+      return `<span class="streak-day${on ? " on" : ""}"><i>${on ? icon("flame") : ""}</i>${compact ? "" : `<em>${n}</em>`}</span>`;
+    }).join("");
+    return `<div class="streak-week" role="img" aria-label="Chuỗi ${done} trên 7 ngày">${cells}</div>`;
+  }
+
+  /* Thẻ streak đầy đủ — dùng ở trang Thống kê */
+  function streakCard(streak) {
+    const s = Math.max(0, Number(streak) || 0);
+    const left = Math.max(0, 7 - s);
+    const subtitle = s === 0
+      ? "Học ít nhất một phút hôm nay để mở chuỗi đầu tiên."
+      : "Hôm nay bạn đang cháy. Quay lại vào mai để nối chuỗi tiếp.";
+    return `${streakMascot()}
+      <div class="streak-title">${s} ngày streak!</div>
+      <p class="streak-sub">${subtitle}</p>
+      ${streakWeek(s)}
+      <div class="streak-reward">
+        <span class="streak-reward-thumb" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="streak-reward-text">
+          <b>Mở khoá chủ đề Streak Fire</b>
+          <span>${left > 0 ? `Còn ${left} ngày tới chuỗi 7 ngày.` : "Đã mở khoá — chuỗi 7 ngày hoàn thành!"}</span>
+        </span>
+      </div>
+      <a class="btn btn-soft btn-sm streak-cta" href="room.html">${icon("flame")} Giữ chuỗi</a>`;
+  }
+
   window.UI = {
     icon,
     hydrateIcons,
+    streakMascot,
+    streakWeek,
+    streakCard,
     escapeHTML,
     initials,
     avatarHTML,

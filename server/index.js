@@ -365,7 +365,10 @@ async function createApp(options = {}) {
       user.last_seen = Date.now();
       DB.touchUser(pool, user.id).catch((err) => console.error("[StudyWithMe] touch", err.message));
     }
-    return { user, token: user ? token : null };
+    /* Trả token thô từ cookie kể cả khi tra cứu thất bại — để bootstrap biết
+       trình duyệt đang giữ cookie phiên (chỉ là lỗi thoáng qua) và không tạo
+       khách mới đè mất cookie. */
+    return { user, token: token || null };
   }
 
   async function ensureUser(req, res) {
@@ -431,7 +434,24 @@ async function createApp(options = {}) {
 
     /* Bootstrap script -------------------------------------------------- */
     if (pathname === "/api/bootstrap.js" && method === "GET") {
-      const { user } = await ensureUser(req, res);
+      const current = await resolveUser(req);
+      let user = current.user;
+      /* Cookie phiên có sẵn nhưng chưa tra được: có thể là lỗi thoáng qua khi
+         backend khởi động lại. Đừng tạo khách mới đè mất cookie — trả null,
+         giao diện chạy chế độ xem thử và phiên sẽ sống lại ở lần load sau. */
+      if (!user && current.token) {
+        return sendBody(req, res, 200, "text/javascript; charset=utf-8", "window.__SWM_BOOTSTRAP__ = null;", {
+          "Cache-Control": "no-store",
+        });
+      }
+      if (!user) {
+        if (!(await guestBudget(req))) user = null;
+        else {
+          user = await S.ensureGuest(ctx);
+          const token = await S.createSession(ctx, user.id);
+          res.setHeader("Set-Cookie", sessionCookie(req, token, Math.floor(S.SESSION_TTL / 1000)));
+        }
+      }
       /* Không có phiên (vượt hạn mức tạo khách): trả null để giao diện chạy ở
          chế độ xem thử, không ghi dữ liệu. */
       if (!user) {
@@ -563,6 +583,12 @@ async function createApp(options = {}) {
       );
     }
 
+    /* Hồ sơ công khai của một thành viên (thẻ hồ sơ trong phòng học). */
+    const memberMatch = method === "GET" && pathname.match(/^\/api\/users\/([\w-]{3,64})\/profile$/);
+    if (memberMatch) {
+      return sendJSON(req, res, 200, await S.memberProfile(ctx, memberMatch[1]));
+    }
+
     if (pathname === "/api/stats" && method === "GET") {
       const days = U.clampInt(url.searchParams.get("days"), 7, 400, 90);
       return sendJSON(req, res, 200, await S.statsFor(ctx, user, days));
@@ -620,7 +646,8 @@ async function createApp(options = {}) {
       if (denyGuest(req, res, user)) return;
       const body = await readBody(req);
       const name = U.cleanText(body.name, 90);
-      const subject = U.cleanText(body.subject, 40) || "toan";
+      /* Phòng không gắn cứng môn — tên phòng tự nói nội dung ("Học Toán"...). */
+      const subject = U.cleanText(body.subject, 40) || "mixed";
       const type = Object.prototype.hasOwnProperty.call(U.ROOM_TYPES, body.type) ? body.type : "community";
       const topic = U.cleanText(body.topic, 160);
 
@@ -736,6 +763,13 @@ async function createApp(options = {}) {
         await sse.broadcastPresence(room.id);
         return sendJSON(req, res, 200, { ok: true });
       }
+
+      /* Beacon khi rời trang phòng — không có body, cookie vẫn gửi kèm. */
+      if (sub === "/exit" && method === "POST") {
+        await S.exitPresence(ctx, room, user);
+        await sse.broadcastPresence(room.id);
+        return sendJSON(req, res, 200, { ok: true });
+      }
     }
 
     /* Sự kiện thời gian thực -------------------------------------------- */
@@ -787,6 +821,23 @@ async function createApp(options = {}) {
     if (pathname === "/api/shop/buy" && method === "POST") {
       const body = await readBody(req);
       const result = await S.buyItem(ctx, user, U.cleanText(body.id, 40));
+      return sendJSON(req, res, 200, result);
+    }
+
+    /* Vườn học tập -------------------------------------------------------- */
+    if (pathname === "/api/garden" && method === "GET") {
+      return sendJSON(req, res, 200, await S.gardenState(ctx, user));
+    }
+
+    if (pathname === "/api/garden/choose" && method === "POST") {
+      const body = await readBody(req);
+      const result = await S.chooseCompanion(ctx, user, U.cleanText(body.kind, 10), U.cleanText(body.id, 40));
+      return sendJSON(req, res, 200, result);
+    }
+
+    if (pathname === "/api/garden/tend" && method === "POST") {
+      const body = await readBody(req);
+      const result = await S.tendGarden(ctx, user, U.cleanText(body.kind, 10), U.cleanText(body.id, 40));
       return sendJSON(req, res, 200, result);
     }
 

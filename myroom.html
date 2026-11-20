@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Phòng của tôi — StudyWithMe</title>
-  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+  <link rel="icon" type="image/png" href="assets/img/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -20,8 +20,8 @@
       }
     })();
   </script>
-  <link rel="stylesheet" href="assets/css/base.css">
-  <link rel="stylesheet" href="assets/css/app.css">
+  <link rel="stylesheet" href="assets/css/base.css?v=4">
+  <link rel="stylesheet" href="assets/css/app.css?v=4">
 </head>
 <body class="app-body-page" data-page="myrooms">
   <div class="app">
@@ -104,15 +104,9 @@
           <label for="roomName">Tên phòng</label>
           <input class="input" id="roomName" type="text" maxlength="60" required placeholder="VD: Ôn Toán 12 · Cực trị hàm số">
         </div>
-        <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div class="field">
-            <label for="roomSubject">Môn học</label>
-            <input class="input" id="roomSubject" type="text" maxlength="40" placeholder="VD: Toán">
-          </div>
-          <div class="field">
-            <label for="roomTopic">Mục tiêu buổi học</label>
-            <input class="input" id="roomTopic" type="text" maxlength="70" placeholder="VD: Chữa 20 câu cực trị">
-          </div>
+        <div class="field">
+          <label for="roomTopic">Mục tiêu buổi học <span style="color:var(--text-4)">(không bắt buộc)</span></label>
+          <input class="input" id="roomTopic" type="text" maxlength="70" placeholder="VD: Chữa 20 câu cực trị">
         </div>
         <p class="field-hint" id="roomTypeHint">Phòng Cộng đồng hiển thị công khai ở Sảnh chính.</p>
       </form>
@@ -124,9 +118,9 @@
   </div>
 
   <script src="/api/bootstrap.js"></script>
-  <script src="assets/js/data.js" defer></script>
-  <script src="assets/js/ui.js" defer></script>
-  <script src="assets/js/shell.js" defer></script>
-  <script src="assets/js/myroom.js" defer></script>
+  <script src="assets/js/data.js?v=4" defer></script>
+  <script src="assets/js/ui.js?v=4" defer></script>
+  <script src="assets/js/shell.js?v=4" defer></script>
+  <script src="assets/js/myroom.js?v=4" defer></script>
 </body>
 </html>

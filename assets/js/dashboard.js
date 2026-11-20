@@ -7,7 +7,7 @@
 
   const D = window.DATA;
   const Store = window.Store;
-  const { icon, hydrateIcons, escapeHTML, avatarHTML, toast } = window.UI;
+  const { icon, hydrateIcons, escapeHTML, avatarHTML, toast, streakWeek } = window.UI;
 
   let activeSubject = "all";
   let activeQuery = "";
@@ -44,10 +44,11 @@
   }
 
   function subject(id) {
+    if (id === "mixed") return { name: "", color: "#8a8a85" };
     if (typeof id === "string" && id.startsWith("custom:")) {
       return { name: id.slice(7), color: "#959590" };
     }
-    return D.SUBJECT_MAP[id] || { name: "Khác", color: "#959590" };
+    return D.SUBJECT_MAP[id] || { name: "", color: "#8a8a85" };
   }
 
   function subjectValue(value) {
@@ -101,32 +102,58 @@
     const diffPct = yesterday > 0 ? Math.round((diff / yesterday) * 100) : diff > 0 ? 100 : 0;
     const done = s.todos.filter((t) => t.done).length;
     const total = s.todos.length;
+
+    const goalMinutes = Math.max(15, Number(s.profile.goalHours) || 0) * 60;
+    const todayPct = Math.min(100, Math.round((todayMinutes / goalMinutes) * 100));
+    const stars = Number(s.profile.stars) || 0;
+    const milestone = Math.max(1000, Math.ceil((stars + 1) / 1000) * 1000);
+    const starsToGo = Math.max(0, milestone - stars);
+    const starsPct = stars > 0 ? Math.min(100, Math.round(((stars % 1000) / 1000) * 100)) : 0;
+    const donePct = total ? Math.min(100, Math.round((done / total) * 100)) : 0;
+
+    const trend = (dir, pct) =>
+      dir === "flat"
+        ? `<span class="stat-trend">${icon("minus")} 0%</span>`
+        : `<span class="stat-trend ${dir}">${dir === "up" ? icon("arrow-up") : icon("arrow-up")} ${pct}%</span>`;
+
     const cards = [
       {
+        cls: "stat-card--today",
         label: "Hôm nay",
-        value: D.formatMinutes(todayMinutes),
         icon: "clock",
-        foot: diff === 0
-          ? `Bằng hôm qua · mục tiêu ${s.profile.goalHours} giờ`
-          : `<span class="${diff > 0 ? "up" : ""}">${diff > 0 ? icon("arrow-up") : "▼"} ${Math.abs(diffPct)}%</span> so với hôm qua`,
+        value: D.formatMinutes(todayMinutes),
+        foot:
+          diff === 0
+            ? `${trend("flat")} Bằng hôm qua`
+            : `${trend(diff > 0 ? "up" : "down", Math.abs(diffPct))} so với hôm qua`,
+        bar: todayPct,
+        barAria: `Tiến độ mục tiêu hôm nay: ${todayPct}%`,
       },
       {
-        label: "Chuỗi ngày",
-        value: `${s.profile.streak} ngày`,
-        icon: "flame",
-        foot: todayMinutes > 0 ? "Hôm nay đã giữ chuỗi ✓" : "Học hôm nay để nối chuỗi",
-      },
-      {
+        cls: "stat-card--stars",
         label: "Study Stars",
-        value: s.profile.stars.toLocaleString("vi-VN"),
         icon: "star",
-        foot: "Tổng Sao tích luỹ từ giờ học",
+        value: s.profile.stars.toLocaleString("vi-VN"),
+        foot:
+          stars > 0
+            ? `${icon("sparkles")} Còn ${starsToGo.toLocaleString("vi-VN")}★ đến mốc ${milestone.toLocaleString("vi-VN")}★`
+            : `${icon("sparkles")} Học để nhận ngôi sao đầu tiên`,
+        bar: starsPct,
+        barAria: `Tiến độ đến mốc sao kế tiếp: ${starsPct}%`,
       },
       {
+        cls: "stat-card--todos",
         label: "Việc cần làm",
-        value: `${done}<small>/ ${total}</small>`,
         icon: "check-circle",
-        foot: done === total ? "Đã hoàn thành tất cả 🎉" : `Còn ${total - done} việc hôm nay`,
+        value: `${done}<small>/ ${total}</small>`,
+        foot:
+          !total
+            ? `${icon("target")} Chưa có việc nào — thêm việc đầu tiên`
+            : done === total
+              ? `${icon("check")} Đã hoàn thành tất cả 🎉`
+              : `${icon("target")} Còn ${total - done} việc · hoàn thành ${donePct}%`,
+        bar: donePct,
+        barAria: `Tiến độ việc cần làm: ${donePct}%`,
       },
     ];
 
@@ -134,13 +161,13 @@
     grid.innerHTML = cards
       .map(
         (c) => `
-        <article class="stat-card">
+        <article class="stat-card ${c.cls}">
           <div class="stat-top">
             <span class="stat-label">${c.label}</span>
-            <span class="stat-icon">${icon(c.icon)}</span>
           </div>
           <div class="stat-value">${c.value}</div>
           <div class="stat-foot">${c.foot}</div>
+          <div class="stat-bar" role="progressbar" aria-valuenow="${c.bar}" aria-valuemin="0" aria-valuemax="100" aria-label="${c.barAria}"><span style="width:${c.bar}%"></span></div>
         </article>`
       )
       .join("");
@@ -149,39 +176,37 @@
     if (railStreak) railStreak.textContent = `${s.profile.streak} ngày`;
   }
 
+  /* Chuỗi ngày — thẻ gọn ở Sảnh chính: số ngày, trạng thái hôm nay và 7 ô lửa */
+  function renderStreak() {
+    const wrap = document.getElementById("streakWidget");
+    if (!wrap) return;
+    const streak = Math.max(0, Number(Store.state.profile.streak) || 0);
+    const todayMinutes = D.minutesForDay(D.startOfToday());
+    wrap.innerHTML = `
+      <div class="streak-mini-head">
+        <span class="streak-mini-label">Chuỗi ngày</span>
+        <a class="streak-mini-badge" href="stats.html" aria-label="Xem thống kê chuỗi ngày">${icon("flame")}</a>
+      </div>
+      <div class="streak-mini-value">${streak}<small>ngày</small></div>
+      <div class="streak-mini-foot">${todayMinutes > 0 ? "Hôm nay đã giữ chuỗi ✓" : "Học hôm nay để nối chuỗi"}</div>
+      <div class="streak-mini-week">${streakWeek(streak)}</div>`;
+  }
+
+  /* Bộ lọc theo môn đã bỏ — tên phòng tự nói nội dung. */
   function renderFilters() {
     const wrap = document.getElementById("roomFilters");
-    const used = [...new Set(Store.state.rooms.map((r) => r.subject))];
-    const items = [{ id: "all", name: "Tất cả", color: "#eeeeeb" }, ...used.map((id) => subject(id))];
-    wrap.innerHTML = items
-      .map(
-        (s) =>
-          `<button class="chip${activeSubject === s.id ? " active" : ""}" data-filter="${s.id}">
-             ${s.id !== "all" ? `<i style="width:6px;height:6px;border-radius:2px;background:${s.color}"></i>` : ""}
-             ${escapeHTML(s.name)}
-           </button>`
-      )
-      .join("");
-
-    wrap.querySelectorAll("[data-filter]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        activeSubject = btn.dataset.filter;
-        renderFilters();
-        renderRooms();
-      });
-    });
+    if (wrap) wrap.innerHTML = "";
   }
 
   function renderRooms() {
     const q = activeQuery.toLowerCase();
     const rooms = Store.state.rooms.filter((room) => {
-      const okSubject = activeSubject === "all" || room.subject === activeSubject;
       const okQuery =
         !q ||
         room.name.toLowerCase().includes(q) ||
         room.host.toLowerCase().includes(q) ||
         (room.topic || "").toLowerCase().includes(q);
-      return okSubject && okQuery && room.type !== "solo";
+      return okQuery && room.type !== "solo";
     });
 
     const grid = document.getElementById("roomGrid");
@@ -208,9 +233,6 @@
         return `
         <article class="room-card">
           <div class="room-card-top">
-            <span class="room-subject" style="color:${sub.color}">
-              <i style="background:${sub.color}"></i>${escapeHTML(sub.name)}
-            </span>
             ${room.type !== "community" ? `<span class="tag">${icon(type.icon)} ${type.label}</span>` : ""}
             ${room.live ? '<span class="room-live"><i></i> LIVE</span>' : '<span class="room-live" style="color:var(--text-4)">SẮP MỞ</span>'}
           </div>
@@ -244,6 +266,17 @@
     grid.querySelectorAll("[data-room-disabled]").forEach((link) => {
       link.addEventListener("click", (event) => event.preventDefault());
     });
+
+    /* Khách bấm "Vào phòng": mở bảng Đăng ký/Đăng nhập ngay tại đây, xong vào
+       thẳng phòng vừa chọn thay vì quay lại Sảnh chính. */
+    if (isGuestAccount()) {
+      grid.querySelectorAll('a[href^="room.html?room="]').forEach((link) => {
+        link.addEventListener("click", (event) => {
+          event.preventDefault();
+          window.UI.openAuth("register", { afterAuth: link.getAttribute("href") });
+        });
+      });
+    }
   }
 
   /* ---------------------------------------------------------------------- */
@@ -258,7 +291,7 @@
 
     const wrap = document.getElementById("todaySchedule");
     const count = document.getElementById("todayScheduleCount");
-    if (count) count.innerHTML = `<span class="dot"></span> ${items.length} ca học`;
+    if (count) count.innerHTML = `<b>${items.length}</b> ca học`;
     if (!items.length) {
       wrap.innerHTML = `<div class="empty" style="padding:24px 10px">
         ${icon("calendar")}
@@ -284,22 +317,14 @@
       .join("")}</div>`;
   }
 
-  function renderFriends() {
-    document.getElementById("friendsList").innerHTML =
-      `<div class="empty" style="padding:18px 10px"><span>Chưa có thông tin bạn học đang trực tuyến.</span></div>`;
-  }
-
   /* ---------------------------------------------------------------------- */
   /* Create room                                                            */
   /* ---------------------------------------------------------------------- */
 
   function initCreateRoom() {
     const form = document.getElementById("createRoomForm");
-    const select = document.getElementById("roomSubject");
     const picker = document.getElementById("typePicker");
     const hint = document.getElementById("roomTypeHint");
-
-    select.value = "Toán";
 
     picker.querySelectorAll("[data-type]").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -328,7 +353,6 @@
       try {
         const room = await Store.createRoom({
           name,
-          subject: subjectValue(select.value),
           type: newRoomType,
           topic: document.getElementById("roomTopic").value.trim(),
         });
@@ -366,10 +390,10 @@
     renderGreeting();
     renderExam();
     renderStats();
+    renderStreak();
     renderFilters();
     renderRooms();
     renderTodaySchedule();
-    renderFriends();
     initCreateRoom();
     gateCreateRoomButton();
 

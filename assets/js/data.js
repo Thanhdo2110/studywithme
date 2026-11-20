@@ -151,6 +151,29 @@
     return daily;
   }
 
+  function emptyGarden() {
+    return { plant: null, pet: null, plants: {}, pets: {} };
+  }
+
+  function normalizeGarden(raw) {
+    const garden = emptyGarden();
+    if (!raw || typeof raw !== "object") return garden;
+    if (typeof raw.plant === "string") garden.plant = raw.plant;
+    if (typeof raw.pet === "string") garden.pet = raw.pet;
+    ["plants", "pets"].forEach((key) => {
+      const source = raw[key];
+      if (!source || typeof source !== "object") return;
+      Object.keys(source).forEach((id) => {
+        const level = Number(source[id]);
+        /* Cấp tối đa = 6, khớp với GARDEN_MAX_LEVEL của server và MAX_LEVEL
+           của garden.js. Kẹp sai về 5 sẽ làm đồng hành cấp 6 tụt cấp mỗi khi
+           tải lại trang. */
+        if (Number.isFinite(level) && level >= 1) garden[key][id] = Math.min(6, Math.floor(level));
+      });
+    });
+    return garden;
+  }
+
   function fallbackState() {
     const daily = {};
     const totalFocus = 0;
@@ -180,6 +203,7 @@
       messagesByRoom: { "toan-12-ham-so": DEFAULT_MESSAGES.map((m) => ({ ...m })) },
       notebooks: {},
       owned: [],
+      garden: emptyGarden(),
       shop: SHOP_FALLBACK,
       totalFocus,
       daily,
@@ -205,6 +229,7 @@
       notebooks: raw.notebooks || {},
       docsByRoom: raw.docsByRoom || {},
       owned: Array.isArray(raw.owned) ? raw.owned : [],
+      garden: normalizeGarden(raw.garden),
       daily: raw.daily || {},
       bySubject: raw.bySubject || {},
       hours: Array.isArray(raw.hours) ? raw.hours : base.hours,
@@ -324,6 +349,8 @@
       exam: p.exam,
       examDate: p.examDate,
       targetSchool: p.targetSchool,
+      currentSchool: p.currentSchool,
+      gender: p.gender,
       goalHours: p.goalHours,
       avatar: p.avatar,
       accent: p.accent,
@@ -468,6 +495,15 @@
       state.myRooms = (state.myRooms || []).filter((item) => item.id !== roomId);
     },
 
+    /* Hỏi lại trạng thái phòng (danh sách thành viên) mà không join lại —
+       dùng cho vòng lặp poll 15s để người mất kết nối biến mất realtime. */
+    async pollRoom(roomId) {
+      const data = await api(`/api/rooms/${encodeURIComponent(roomId)}`);
+      const index = state.rooms.findIndex((item) => item.id === data.room.id);
+      if (index >= 0) state.rooms[index] = data.room;
+      return data;
+    },
+
     async refreshMyRooms() {
       const data = await api("/api/me/rooms");
       state.myRooms = data.rooms || [];
@@ -480,7 +516,11 @@
         body: { text },
       });
       const list = state.messagesByRoom[roomId] || (state.messagesByRoom[roomId] = []);
-      list.push(data.message);
+      /* SSE có thể đến trước khi POST trả về — nếu đã có thì thay bằng bản
+         chính thức từ POST (đúng cờ me); chưa có thì đẩy mới. */
+      const index = list.findIndex((m) => m.id === data.message.id);
+      if (index >= 0) list[index] = data.message;
+      else list.push(data.message);
       if (list.length > 120) state.messagesByRoom[roomId] = list.slice(-120);
       return data.message;
     },
@@ -491,7 +531,8 @@
         body: payload,
       });
       const list = state.docsByRoom[roomId] || (state.docsByRoom[roomId] = []);
-      list.unshift(data.doc);
+      /* SSE "docs" có thể đến trước khi POST trả về — chỉ thêm nếu chưa có. */
+      if (!list.some((d) => d.id === data.doc.id)) list.unshift(data.doc);
       return data.doc;
     },
 
@@ -509,6 +550,23 @@
       const data = await api("/api/shop/buy", { method: "POST", body: { id: itemId } });
       state.profile.stars = data.stars;
       state.owned = data.owned;
+      return data;
+    },
+
+    /* Vườn học tập ------------------------------------------------------- */
+    async chooseCompanion(kind, id) {
+      const data = await api("/api/garden/choose", { method: "POST", body: { kind, id } });
+      state.garden = normalizeGarden(data.garden);
+      state.profile.stars = data.stars;
+      if (window.Shell) window.Shell.refresh();
+      return data;
+    },
+
+    async tendGarden(kind, id) {
+      const data = await api("/api/garden/tend", { method: "POST", body: { kind, id } });
+      state.garden = normalizeGarden(data.garden);
+      state.profile.stars = data.stars;
+      if (window.Shell) window.Shell.refresh();
       return data;
     },
 

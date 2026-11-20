@@ -117,11 +117,11 @@ h1, h2, h3, h4, h5, h6 {
   --c-dgnl: #9a8cf7;
 
   /* geometry */
-  --radius-sm: 8px;
-  --radius: 12px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
-  --radius-xl: 26px;
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
 
   --font: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
@@ -267,8 +267,9 @@ h1, h2, h3, h4, h5, h6 {
   padding-inline: 24px;
 }
 
-.section { padding: clamp(64px, 8.5vw, 116px) 0; }
-.section--tight { padding-block: clamp(48px, 6vw, 76px); }
+.section { padding: clamp(56px, 6.5vw, 84px) 0; }
+section[id], div[id="faq"] { scroll-margin-top: calc(var(--header-h) + 20px); }
+.section--tight { padding-block: clamp(44px, 5.5vw, 68px); }
 
 .mono {
   font-family: var(--mono);
@@ -295,23 +296,27 @@ h1, h2, h3, h4, h5, h6 {
 .section-head {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 16px;
+  align-items: flex-start;
+  text-align: left;
+  gap: 12px;
   margin-bottom: clamp(32px, 4vw, 52px);
 }
 
 .section-title {
-  font-size: clamp(28px, 4vw, 46px);
-  letter-spacing: -0.04em;
-  max-width: 780px;
+  font-size: clamp(28px, 2.6vw, 32px);
+  line-height: 1.31;
+  letter-spacing: 0;
+  font-weight: 500;
+  max-width: 1232px;
+  text-wrap: balance;
 }
 
 .section-sub {
-  color: var(--text-2);
-  max-width: 620px;
-  font-size: 15.5px;
-  line-height: 1.7;
+  color: var(--text-3);
+  max-width: 780px;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 500;
 }
 
 .ico {
@@ -350,7 +355,7 @@ h1, h2, h3, h4, h5, h6 {
   height: 44px;
   padding: 0 20px;
   border: 1px solid transparent;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 14.5px;
   font-weight: 500;
   letter-spacing: -0.005em;
@@ -404,6 +409,10 @@ h1, h2, h3, h4, h5, h6 {
 .btn-lg { height: 52px; padding: 0 26px; font-size: 15.5px; border-radius: 12px; }
 .btn-block { width: 100%; }
 .btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
   width: 38px;
   height: 38px;
   padding: 0;
@@ -422,9 +431,9 @@ h1, h2, h3, h4, h5, h6 {
   gap: 7px;
   height: 26px;
   padding: 0 10px;
-  border-radius: 99px;
-  border: 1px solid var(--border);
-  background: var(--surface-2);
+  border-radius: 8px;
+  border: 1px solid var(--border-2);
+  background: transparent;
   color: var(--text-2);
   font-size: 11.5px;
   font-weight: 500;
@@ -432,13 +441,22 @@ h1, h2, h3, h4, h5, h6 {
   white-space: nowrap;
 }
 .pill--accent {
-  background: var(--accent-dim);
-  border-color: var(--accent-border);
-  color: var(--accent);
+  background: transparent;
+  border-color: var(--border-2);
+  color: var(--text-2);
 }
 .pill--outline { background: transparent; }
-.pill--mono { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.04em; }
-.pill--lg { height: 32px; padding: 0 13px; font-size: 12.5px; }
+.pill--mono { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.04em; }.pill--lg { height: 32px; padding: 0 13px; font-size: 12.5px; }
+
+/* Đếm gọn — chỉ chữ, số đậm màu accent */
+.mini-count {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+.mini-count b { font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
 
 .tag {
   display: inline-flex;
@@ -671,7 +689,7 @@ h1, h2, h3, h4, h5, h6 {
   gap: 7px;
   height: 32px;
   padding: 0 13px;
-  border-radius: 99px;
+  border-radius: 8px;
   border: 1px solid var(--border);
   background: transparent;
   color: var(--text-2);
@@ -682,9 +700,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 .chip:hover { color: var(--text); border-color: var(--border-2); background: var(--surface-2); }
 .chip.active {
-  background: var(--accent-dim);
-  border-color: var(--accent-border);
-  color: var(--accent);
+  background: transparent;
+  border-color: var(--border-strong);
+  color: var(--text);
 }
 
 /* list rows */
@@ -958,24 +976,26 @@ h1, h2, h3, h4, h5, h6 {
 .brand { display: inline-flex; align-items: center; gap: 9px; flex: none; }
 .brand-logo {
   display: block;
-  height: 60px;
+  height: 42px;
   width: auto;
   max-width: none;
 }
 .brand-logo-full {
   display: block;
-  width: 260px;
+  width: 182px;
   height: auto;
   max-width: none;
 }
 .brand-logo-mark {
   display: block;
-  width: 24px;
-  height: 24px;
+  width: 17px;
+  height: 17px;
   max-width: none;
 }
-.sidebar-top .brand-logo { height: 40px; }
-.auth-brand .brand-logo { height: 72px; max-width: 100%; margin-bottom: 4px; }
-[data-theme="dark"] .brand-logo,
-[data-theme="dark"] .brand-logo-full,
-[data-theme="dark"] .brand-logo-mark { filter: invert(1); }
+.sidebar-top .brand-logo { height: 28px; }
+.auth-brand .brand-logo { height: 50px; max-width: 100%; margin-bottom: 4px; }
+/* Logo PNG giữ gradient riêng: đổi biến thể theo theme */
+.brand-logo--dark { display: none; }
+[data-theme="dark"] .brand-logo--light { display: none; }
+[data-theme="dark"] .brand-logo--dark { display: block; }
+.brand-logo-mark { object-fit: contain; }

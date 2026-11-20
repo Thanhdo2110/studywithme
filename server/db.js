@@ -266,6 +266,12 @@ const SCHEMA_SQL = `
     PRIMARY KEY (user_id, day)
   );
 
+  CREATE TABLE IF NOT EXISTS gardens (
+    user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    data JSONB NOT NULL DEFAULT '{}'::jsonb,
+    updated_at BIGINT NOT NULL DEFAULT 0
+  );
+
   CREATE TABLE IF NOT EXISTS owned (
     user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     item_id TEXT NOT NULL,
@@ -426,6 +432,7 @@ async function resetUser(pool, user) {
     await client.query("DELETE FROM schedule WHERE user_id = $1", [user.id]);
     await client.query("DELETE FROM focus_daily WHERE user_id = $1", [user.id]);
     await client.query("DELETE FROM owned WHERE user_id = $1", [user.id]);
+    await client.query("DELETE FROM gardens WHERE user_id = $1", [user.id]);
 
     const p = defaultProfile();
     await client.query(

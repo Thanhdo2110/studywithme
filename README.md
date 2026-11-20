@@ -7,7 +7,7 @@ Kiến trúc hiện tại (v3):
 
 - **Frontend** = container nginx phục vụ HTML/CSS/JS và reverse proxy `/api` (kèm SSE) sang backend.
 - **Backend** = container Node.js HTTP server thuần (không Express) chỉ phục vụ REST API + SSE.
-- **Postgres 16** là nơi lưu dữ liệu bền vững (hồ sơ, phòng, ghế, chat, sổ nháp, tài liệu, lịch, to-do, giờ học, Sao, vật phẩm).
+- **Postgres 16** là nơi lưu dữ liệu bền vững (hồ sơ, phòng, ghế, chat, sổ nháp, tài liệu, lịch, to-do, giờ học, Sao, vườn cây & thú cưng).
 - **Redis 7** giữ phiên đăng nhập (TTL tự dọn), rate limit đăng nhập và credit giờ học.
 - **Docker Compose** dựng cả bốn dịch vụ (`frontend`, `backend`, `postgres`, `redis`) bằng một lệnh.
 
@@ -99,8 +99,8 @@ Vẫn mở được các trang HTML để xem giao diện, nhưng khi đó ứng
 | Phòng của tôi | `myroom.html` | Danh sách phòng đã tạo/đã tham gia, lọc chủ phòng/thành viên, Vào phòng, Rời/Giải tán |
 | Kế hoạch học | `planner.html` | Time-blocking theo tuần, thêm/xoá ca học, danh sách việc cần làm |
 | Phòng học | `room.html` | Thành viên + số ghế, Pomodoro/đếm xuôi, heartbeat, mục tiêu, ghim tệp từ máy/điện thoại hoặc URL, chat realtime/sổ nháp, Rời phòng / Giải tán nhóm |
-| Thống kê | `stats.html` | Heatmap 90/180/365 ngày, KPI, phân bố môn, khung giờ, phiếu thành tích PNG |
-| Hồ sơ & cài đặt | `profile.html` | Thông tin học tập, avatar, màu nhấn, sáng/tối, nhắc nhở, Study Stars, tài khoản, đặt lại dữ liệu |
+| Thống kê | `stats.html` | Heatmap 90/180/365 ngày, KPI, phân bố môn, khung giờ, chuỗi ngày, thành tích |
+| Hồ sơ & cài đặt | `profile.html` | Thông tin học tập, avatar, màu nhấn, sáng/tối, nhắc nhở, Vườn học tập (cây trồng & thú cưng nuôi bằng Study Stars), tài khoản, đặt lại dữ liệu |
 
 ## Cấu trúc
 
@@ -162,6 +162,9 @@ Tất cả phản hồi là JSON (trừ `/api/bootstrap.js` và SSE). Phiên xá
 | `POST` | `/api/focus` | Ghi nhận giờ học tập trung (server xác thực) |
 | `GET` | `/api/shop` | Danh mục + vật phẩm đã sở hữu |
 | `POST` | `/api/shop/buy` | Mua vật phẩm bằng Study Stars |
+| `GET` | `/api/garden` | Trạng thái vườn học tập (cây, thú cưng, cấp) |
+| `POST` | `/api/garden/choose` | Chọn cây trồng hoặc thú cưng đồng hành |
+| `POST` | `/api/garden/tend` | Tưới cây / cho ăn, trừ Sao và lên cấp |
 
 ### Điểm đáng chú ý
 
@@ -185,7 +188,7 @@ docker compose exec backend npm test
 2. Lưu bền vững hồ sơ, lịch, to-do.
 3. Tạo phòng, chat, ghim tài liệu, sổ nháp.
 4. Focus được xác thực phía server và cộng Sao.
-5. Cửa hàng trừ Sao, chống mua trùng.
+5. Vườn học tập trừ Sao khi tưới cây/cho ăn trong transaction, chặn chăm sóc khi đã ở mốc cuối (6 mốc: hạt → nảy mầm → thân → phân cành → tán lá → kết quả).
 6. Đăng ký nâng cấp khách → đăng xuất → đăng nhập lại.
 7. Thống kê heatmap/chuỗi ngày.
 8. Đặt lại dữ liệu về bộ mẫu.
