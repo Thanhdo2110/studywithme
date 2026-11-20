@@ -323,7 +323,20 @@ function serializeMessage(row, user) {
   };
 }
 
+const MSG_HOURLY_CAP = 200;
+
 async function addMessage(ctx, room, user, text) {
+  /* Ngưỡng theo giờ: người dùng thật không viết quá 200 tin trong 1 giờ —
+     chặn bot spam chat trước khi tới hạn độ 800ms/tin. */
+  const capKey = `swm:rl:msg:${user.id}`;
+  const sent = await ctx.kv.incr(capKey).catch(() => 0);
+  if (sent === 1) await ctx.kv.expire(capKey, 3600).catch(() => {});
+  if (sent > MSG_HOURLY_CAP) {
+    throw Object.assign(new Error("Bạn gửi quá nhiều tin nhắn trong giờ này. Hãy nghỉ một chút."), {
+      status: 429,
+      code: "RATE_LIMITED",
+    });
+  }
   const now = Date.now();
   const client = await ctx.pool.connect();
   try {

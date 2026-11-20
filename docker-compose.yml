@@ -6,7 +6,7 @@ services:
     container_name: swm-postgres
     environment:
       POSTGRES_USER: swm
-      POSTGRES_PASSWORD: swm
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-swm}
       POSTGRES_DB: swm
       TZ: Asia/Ho_Chi_Minh
     ports:

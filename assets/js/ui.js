@@ -228,7 +228,7 @@
           </div>
           <div class="field">
             <label for="authPassword">Mật khẩu</label>
-            <input class="input" id="authPassword" name="password" type="password" minlength="6" maxlength="128" autocomplete="current-password" placeholder="Ít nhất 6 ký tự" required>
+            <input class="input" id="authPassword" name="password" type="password" minlength="8" maxlength="128" autocomplete="current-password" placeholder="Ít nhất 8 ký tự" required>
           </div>
           <p class="auth-error hidden" id="authError" role="alert"></p>
           <button class="btn btn-accent btn-block" type="submit" id="authSubmit">${icon("log-in")} Đăng nhập</button>
@@ -281,7 +281,7 @@
       const name = nameInput.value.trim();
 
       if (!email) return fail("Hãy nhập email của bạn.");
-      if (password.length < 6) return fail("Mật khẩu cần ít nhất 6 ký tự.");
+      if (password.length < 8) return fail("Mật khẩu cần ít nhất 8 ký tự.");
       if (mode === "register" && name.length < 2) return fail("Hãy nhập họ và tên của bạn.");
       /* Không chặn theo Store.offline: chế độ offline chỉ là bootstrap trống
          (phiên cũ hết hạn) chứ máy chủ vẫn chạy — login/register vẫn hoạt động,

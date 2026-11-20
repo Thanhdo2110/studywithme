@@ -91,6 +91,18 @@ function createSseHub({ pool, service }) {
     },
   };
 
+  /* Số kết nối SSE đang mở của một người — chống cạn socket khi mở
+     hàng trăm tab hoặc script tự nối lại vô hạn. */
+  sse.countForUser = function countForUser(userId) {
+    let n = 0;
+    streams.forEach((set) =>
+      set.forEach((client) => {
+        if (client.userId === userId) n += 1;
+      })
+    );
+    return n;
+  };
+
   return sse;
 }
 

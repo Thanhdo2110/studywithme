@@ -406,7 +406,7 @@ async function createApp(options = {}) {
 
       if (name.length < 2) return sendError(req, res, 400, "Hãy nhập họ tên của bạn.", "BAD_NAME");
       if (!U.validEmail(email)) return sendError(req, res, 400, "Email chưa đúng định dạng.", "BAD_EMAIL");
-      if (password.length < 6) return sendError(req, res, 400, "Mật khẩu cần ít nhất 6 ký tự.", "WEAK_PASSWORD");
+      if (password.length < 8) return sendError(req, res, 400, "Mật khẩu cần ít nhất 8 ký tự.", "WEAK_PASSWORD");
 
       const existing = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
       if (existing.rows.length) {
@@ -436,13 +436,24 @@ async function createApp(options = {}) {
       const body = await readBody(req);
       const email = U.cleanText(body.email, 160).toLowerCase();
       const password = String(body.password || "");
+      /* Khóa theo tài khoản: chặn brute force khi kẻ xấu đổi IP. */
+      const lockKey = `swm:rl:acct:${email}`;
+      if (Number(await ctx.kv.get(lockKey) || 0) >= 10) {
+        return sendError(req, res, 429, "Tài khoản tạm khóa do nhập sai mật khẩu nhiều lần. Thử lại sau 15 phút.", "ACCOUNT_LOCKED");
+      }
       const found = (await pool.query("SELECT * FROM users WHERE email = $1", [email])).rows[0];
+      const badCreds = () => sendError(req, res, 401, "Email hoặc mật khẩu chưa đúng.", "BAD_CREDENTIALS");
       if (!found || found.is_guest || !found.pass_hash) {
-        return sendError(req, res, 401, "Email hoặc mật khẩu chưa đúng.", "BAD_CREDENTIALS");
+        await ctx.kv.incr(lockKey).catch(() => {});
+        await ctx.kv.expire(lockKey, 900).catch(() => {});
+        return badCreds();
       }
       if (!(await U.verifyPassword(password, found.pass_salt, found.pass_hash))) {
-        return sendError(req, res, 401, "Email hoặc mật khẩu chưa đúng.", "BAD_CREDENTIALS");
+        await ctx.kv.incr(lockKey).catch(() => {});
+        await ctx.kv.expire(lockKey, 900).catch(() => {});
+        return badCreds();
       }
+      await ctx.kv.del(lockKey).catch(() => {});
       const token = await S.createSession(ctx, found.id);
       return sendJSON(
         req,
@@ -709,6 +720,9 @@ async function createApp(options = {}) {
       const room = await S.getRoom(ctx, user, roomId);
       if (!room) return sendError(req, res, 404, "Không tìm thấy phòng học.", "ROOM_NOT_FOUND");
       await S.joinRoom(ctx, room, user);
+      if (sse.countForUser(user.id) >= 8) {
+        return sendError(req, res, 429, "Quá nhiều kết nối thời gian thực. Hãy đóng bớt tab.", "TOO_MANY_STREAMS");
+      }
 
       securityHeaders(res);
       res.setHeader("Content-Type", "text/event-stream; charset=utf-8");
