@@ -9,7 +9,9 @@
 
   const D = window.DATA;
   const { icon, escapeHTML, avatarHTML, openModal } = window.UI;
-  const Garden = window.Garden;
+  /* garden.js nạp SAU module này (defer theo thứ tự script) — tra cứu lúc
+     gọi thay vì lúc nạp, nếu không sẽ bắt được undefined. */
+  const Garden = () => window.Garden;
 
   /* ---------------------------------------------------------------------- */
   /* Thẻ hồ sơ thành viên (bấm avatar trong danh sách phòng)                 */
@@ -31,8 +33,8 @@
 
   function memberCardHTML(data) {
     const g = data.garden || {};
-    const flowers = g.plant && Number(g.plantLevel) >= 6 ? Garden.flowerbedFor(g.plant, data.id) : "";
-    const petBadge = Garden.petBadgeFor(g.pet, Number(g.petLevel) || 0);
+    const flowers = g.plant && Number(g.plantLevel) >= 6 ? Garden()?.flowerbedFor(g.plant, data.id) : "";
+    const petBadge = Garden()?.petBadgeFor(g.pet, Number(g.petLevel) || 0);
     const pet = petBadge ? `<span class="study-pet study-pet--hero" title="Người bạn đồng hành" aria-hidden="true">${petBadge}</span>` : "";
     const bio = data.bio || "Người này chưa viết dòng giới thiệu nào.";
     return `<section class="panel profile-hero member-card">

@@ -747,6 +747,21 @@ window.snap = async function (t, name) {
   return (await res.json()).bytes;
 };
 
+/* export a range of frames as JPEG (used to encode the final file with ffmpeg) */
+window.renderFrames = async function (fromIndex, count, fps) {
+  await READY;
+  const pad = (n) => String(n).padStart(5, '0');
+  const msg = [];
+  for (let i = fromIndex; i < fromIndex + count; i++) {
+    const t = Math.min(TOTAL, (i * 1000) / fps);
+    drawFrame(t);
+    const blob = await new Promise((r) => canvas.toBlob(r, 'image/jpeg', 0.94));
+    const res = await fetch('/upload?quiet=1&name=frames/f' + pad(i + 1) + '.jpg', { method: 'POST', body: blob });
+    msg.push((await res.json()).bytes);
+  }
+  return { done: fromIndex + count, bytes: msg.reduce((a, b) => a + b, 0) };
+};
+
 window.renderVideo = async function () {
   await READY;
   const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm';
