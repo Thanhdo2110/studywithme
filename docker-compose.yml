@@ -48,6 +48,8 @@ services:
       TZ: Asia/Ho_Chi_Minh
       SERVE_STATIC: "false"
       TRUST_PROXY: "1"
+      # Bật khi chạy sau Cloudflare Tunnel (TLS kết thúc ở CF, origin nhận HTTP)
+      COOKIE_SECURE: "${COOKIE_SECURE:-0}"
       DATABASE_URL: postgres://swm:swm@postgres:5432/swm
       REDIS_URL: redis://redis:6379
       GUEST_RETENTION_DAYS: "14"

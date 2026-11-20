@@ -2,20 +2,59 @@
 
 > Checklist bắt buộc trước khi mở app cho người dùng thật. Đọc cùng ARCHITECTURE.md.
 
-## 1. HTTPS là bắt buộc (không thoã hiệp)
+## 1. HTTPS là bắt buộc (không thoả hiệp)
 
-Cookie phiên bật `Secure` tự động khi request qua HTTPS — nhưng bản thân
-app phải đứng sau một TLS terminator:
+### Phương án khuyên dùng: Cloudflare Tunnel (đã cài Cloudflare)
 
-```yaml
-# Ví dụ Caddy phía trước docker compose
-yourdomain.com {
-  reverse_proxy localhost:3000   # container frontend (nginx)
-}
+Origin **không mở bất kỳ cổng public nào** — không 80/443, không bị scan:
+
+```bash
+# trên VPS, 1 lần:
+curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o /usr/local/bin/cloudflared
+chmod +x /usr/local/bin/cloudflared
+cloudflared tunnel login
+cloudflared tunnel create studywithme
+
+# /etc/cloudflared/config.yml:
+# tunnel: <tunnel-id>
+# credentials-file: /root/.cloudflared/<tunnel-id>.json
+# ingress:
+#   - hostname: yourdomain.com
+#     service: http://localhost:3000
+#   - service: http_status:404
+
+cloudflared tunnel route dns studywithme yourdomain.com
+cloudflared service install   # chạy như systemd service
 ```
 
-- Caddy/Traefik/Nginx/certbot — chọn 1, cấp cert Let's Encrypt tự động.
-- Cấm expose trực tiếp cổng 3000 ra internet nếu chưa có TLS.
+Firewall lúc này chặn **toàn bộ** incoming, chỉ giữ SSH:
+`ufw default deny incoming; ufw allow 22/tcp; ufw enable`.
+
+App đã sẵn sàng cho CF:
+- `CF-Connecting-IP` được server ưu tiên dùng làm IP thật cho rate limit
+  (origin chỉ nhận từ tunnel nên header không thể giả mạo).
+- Đặt `COOKIE_SECURE=1` trong `.env` — cookie bặt `Secure` dù origin nhận
+  HTTP nội bộ từ tunnel.
+- SSE ping 25s/lần giữ kết nối sống qua CF proxy (timeout idle 100s).
+- Upload 10MB < giới hạn 100MB của gói CF free.
+
+### Bật trong dashboard Cloudflare
+
+| Setting | Giá trị | Lý do |
+|---|---|---|
+| SSL/TLS → Always Use HTTPS | **ON** | ép mọi request qua TLS |
+| SSL/TLS mode | Full (tunnel không cần origin cert) | — |
+| Security → Bot Fight Mode | **ON** | chặn bot quét miễn phí |
+| Security → WAF rate limiting | rule trên `/api/auth/*` (ví dụ 20 req/phút/IP) | lớp ngoài cho rate limit app |
+| Caching | giữ mặc định (API trả `no-store`, HTML `no-cache` — CF không cache nhầm) | — |
+| Network → WebSockets | ON (mặc định) | SSE đi qua HTTP/1.1 proxy bình thường |
+
+### Phương án thay thế: CF proxy về origin IP (không tunnel)
+
+DNS A record bật proxy (mây vàng) + origin cert của CF trên Caddy/nginx,
+SSL mode **Full (strict)**, firewall chỉ mở 80/443 cho
+`https://www.cloudflare.com/ips-v4` — nếu mở cho cả internet thì kẻ xấu
+kết nối thẳng origin và **giả CF-Connecting-IP** né rate limit.
 
 ## 2. Đổi secrets mặc định
 

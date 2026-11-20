@@ -134,7 +134,9 @@ function isSecureRequest(req) {
 }
 
 function sessionCookie(req, token, maxAge) {
-  const secure = isSecureRequest(req) ? "; Secure" : "";
+  /* COOKIE_SECURE=1: ép Secure khi TLS do Cloudflare kết thúc và origin
+     nhận HTTP nội bộ (tunnel) — trình duyệt chỉ ever nói chuyện HTTPS. */
+  const secure = isSecureRequest(req) || process.env.COOKIE_SECURE === "1" ? "; Secure" : "";
   return `${COOKIE}=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${secure}`;
 }
 
@@ -245,6 +247,11 @@ function parseMultipart(buffer, contentType) {
    X-Forwarded-For khi TRUST_PROXY=1 (backend không lộ ra ngoài). */
 function clientIp(req) {
   if (process.env.TRUST_PROXY === "1") {
+    /* Cloudflare gắn IP người dùng thật vào CF-Connecting-IP; khi origin
+       chỉ nhận kết nối từ Cloudflare (firewall/tunnel) thì header này
+       không thể giả mạo. */
+    const cfIp = String(req.headers["cf-connecting-ip"] || "").trim();
+    if (cfIp) return cfIp;
     const forwarded = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
     if (forwarded) return forwarded;
   }
