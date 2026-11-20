@@ -22,8 +22,8 @@
       }
     })();
   </script>
-  <link rel="stylesheet" href="assets/css/base.css?v=9">
-  <link rel="stylesheet" href="assets/css/app.css?v=9">
+  <link rel="stylesheet" href="assets/css/base.css?v=10">
+  <link rel="stylesheet" href="assets/css/app.css?v=10">
 </head>
 <body class="app-body-page" data-page="stats">
   <div class="app">
@@ -126,40 +126,10 @@
             </section>
 
             <section class="panel">
-              <div class="panel-head"><h2>Thành tích</h2><span class="hint">4 / 6</span></div>
+              <section class="panel">
+              <div class="panel-head"><h2>Thành tích</h2><span class="hint" id="achHint">0 / 6</span></div>
               <div class="panel-body">
-                <div class="achievements">
-                  <div class="achievement">
-                    <span class="ach-ico" data-icon="flame"></span>
-                    <div><b>Chuỗi 7 ngày</b><span>Học ít nhất 20 phút mỗi ngày</span></div>
-                    <span class="status">ĐẠT</span>
-                  </div>
-                  <div class="achievement">
-                    <span class="ach-ico" data-icon="clock"></span>
-                    <div><b>100 giờ</b><span>Tổng thời gian tập trung</span></div>
-                    <span class="status">ĐẠT</span>
-                  </div>
-                  <div class="achievement">
-                    <span class="ach-ico" data-icon="sun"></span>
-                    <div><b>Chim sớm</b><span>Bắt đầu trước 6:00 sáng</span></div>
-                    <span class="status">ĐẠT</span>
-                  </div>
-                  <div class="achievement">
-                    <span class="ach-ico" data-icon="shield"></span>
-                    <div><b>Không bỏ ca</b><span>7 ngày liền không huỷ ca học</span></div>
-                    <span class="status">ĐẠT</span>
-                  </div>
-                  <div class="achievement locked">
-                    <span class="ach-ico" data-icon="trophy"></span>
-                    <div><b>30 ngày bền bỉ</b><span>Chuỗi 30 ngày liên tiếp</span></div>
-                    <span class="status">18/30</span>
-                  </div>
-                  <div class="achievement locked">
-                    <span class="ach-ico" data-icon="star"></span>
-                    <div><b>Bậc thầy tập trung</b><span>Đạt 5.000 Study Stars</span></div>
-                    <span class="status">0</span>
-                  </div>
-                </div>
+                <div class="achievements" id="achList"></div>
               </div>
             </section>
           </aside>
@@ -171,9 +141,9 @@
   <div class="heat-tooltip" id="heatTooltip"></div>
 
   <script src="/api/bootstrap.js"></script>
-  <script src="assets/js/data.js?v=9" defer></script>
-  <script src="assets/js/ui.js?v=9" defer></script>
-  <script src="assets/js/shell.js?v=9" defer></script>
-  <script src="assets/js/stats.js?v=9" defer></script>
+  <script src="assets/js/data.js?v=10" defer></script>
+  <script src="assets/js/ui.js?v=10" defer></script>
+  <script src="assets/js/shell.js?v=10" defer></script>
+  <script src="assets/js/stats.js?v=10" defer></script>
 </body>
 </html>

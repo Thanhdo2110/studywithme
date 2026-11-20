@@ -242,6 +242,55 @@
     });
   }
 
+  /* Thành tích tính từ dữ liệu thật: streak, tổng phút (daily), giờ bắt đầu
+     sớm (hours), độ đều (7 ngày gần nhất), Sao (profile.stars). */
+  function renderAchievements() {
+    const list = document.getElementById("achList");
+    if (!list) return;
+    const daily = Store.state.daily || {};
+    const hours = Array.isArray(Store.state.hours) ? Store.state.hours : [];
+    const streak = Math.max(0, Number(Store.state.profile.streak) || 0);
+    const stars = Math.max(0, Number(Store.state.profile.stars) || 0);
+
+    const totalMinutes = Object.values(daily).reduce((a, v) => a + Math.max(0, Number(v) || 0), 0);
+
+    let early = 0;
+    for (let h = 0; h < 6; h++) early += Math.max(0, Number(hours[h]) || 0);
+
+    let last7 = 0;
+    for (let i = 0; i < 7; i++) {
+      const key = D.iso(D.addDays(new Date(), -i));
+      if ((Number(daily[key]) || 0) >= 20) last7 += 1;
+    }
+
+    const defs = [
+      { ico: "flame", name: "Chuỗi 7 ngày", desc: "Học ít nhất 20 phút mỗi ngày", need: 7, have: streak, unit: "ngày" },
+      { ico: "clock", name: "100 giờ", desc: "Tổng thời gian tập trung", need: 6000, have: totalMinutes, unit: "phút" },
+      { ico: "sun", name: "Chim sớm", desc: "Bắt đầu học trước 6:00 sáng", need: 1, have: early > 0 ? 1 : 0, unit: "" },
+      { ico: "shield", name: "Đều đặn", desc: "5 trong 7 ngày gần nhất có học", need: 5, have: last7, unit: "ngày" },
+      { ico: "trophy", name: "30 ngày bền bỉ", desc: "Chuỗi 30 ngày liên tiếp", need: 30, have: streak, unit: "ngày" },
+      { ico: "star", name: "Bậc thầy tập trung", desc: "Đạt 5.000 Study Stars", need: 5000, have: stars, unit: "★" },
+    ];
+
+    let done = 0;
+    list.innerHTML = defs
+      .map((a) => {
+        const pass = a.have >= a.need;
+        if (pass) done += 1;
+        const status = pass ? "ĐẠT" : `${Math.min(a.have, a.need)}/${a.need}`;
+        return `<div class="achievement${pass ? "" : " locked"}">
+          <span class="ach-ico" data-icon="${a.ico}"></span>
+          <div><b>${a.name}</b><span>${a.desc}</span></div>
+          <span class="status">${status}</span>
+        </div>`;
+      })
+      .join("");
+
+    const hint = document.getElementById("achHint");
+    if (hint) hint.textContent = `${done} / ${defs.length}`;
+    if (window.UI.hydrateIcons) window.UI.hydrateIcons(list);
+  }
+
   function renderStreakCard() {
     const wrap = document.getElementById("streakWidget");
     if (wrap) wrap.innerHTML = streakCard(Store.state.profile.streak);
@@ -249,6 +298,7 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     renderStreakCard();
+    renderAchievements();
     renderHeatmap();
     renderHourChart();
     initTooltip();
