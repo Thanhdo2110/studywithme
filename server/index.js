@@ -322,6 +322,15 @@ async function createApp(options = {}) {
 
   /* Tạo phòng và vào phòng chỉ dành cho tài khoản đã đăng ký — khách phải
      đăng ký (hoặc đăng nhập) trước. */
+  /* Giới hạn tạo phòng: 30 phòng/giờ mỗi tài khoản — chống spam phòng
+     làm đầy DB và danh sách phòng cộng đồng. */
+  async function allowRoomCreate(user) {
+    const key = `swm:rl:room:${user.id}`;
+    const count = await ctx.kv.incr(key);
+    if (count === 1) await ctx.kv.expire(key, 3600);
+    return count <= 30;
+  }
+
   function denyGuest(req, res, user) {
     if (!user || !user.is_guest) return false;
     sendError(
@@ -563,6 +572,9 @@ async function createApp(options = {}) {
 
     if (pathname === "/api/rooms" && method === "POST") {
       if (denyGuest(req, res, user)) return;
+      if (!(await allowRoomCreate(user))) {
+        return sendError(req, res, 429, "Bạn tạo quá nhiều phòng. Vui lòng đợi một lát.", "TOO_MANY_ROOMS");
+      }
       const body = await readBody(req);
       const name = U.cleanText(body.name, 90);
       /* Phòng không gắn cứng môn — tên phòng tự nói nội dung ("Học Toán"...). */

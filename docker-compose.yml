@@ -11,7 +11,7 @@ services:
       TZ: Asia/Ho_Chi_Minh
     ports:
       # 5433 ở host để không đụng Postgres cài sẵn trên máy.
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./docker/postgres-init.sql:/docker-entrypoint-initdb.d/10-init.sql:ro
@@ -27,7 +27,7 @@ services:
     command: ["redis-server", "--appendonly", "yes"]
     ports:
       # 6380 ở host để không đụng Redis cài sẵn trên máy.
-      - "6380:6379"
+      - "127.0.0.1:6380:6379"
     volumes:
       - redisdata:/data
     healthcheck:
