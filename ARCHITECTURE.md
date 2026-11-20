@@ -16,7 +16,14 @@ Chọn vanilla stack để giữ bản nhẹ, không build-step, dễ mang đi t
 | File | Vai trò | Ranh giới |
 |---|---|---|
 | `index.js` | HTTP layer: route, parse body, cookie/session, SSE | KHÔNG viết SQL trực tiếp — gọi `service.js` |
-| `service.js` | Nghiệp vụ: phòng, thành viên, chat, docs, focus, garden, profile | duy nhất nơi viết SQL |
+| `service.js` | **Facade** re-export từ `services/` — API duy nhất cho `index.js` | không chứa nghiệp vụ |
+| `services/shared.js` | Hằng số, serializer, helper nhỏ dùng chung | không I/O nặng |
+| `services/auth.js` | Phiên Redis, guest, nâng cấp tài khoản | — |
+| `services/rooms.js` | Phòng, thành viên & ghế, presence, chat, docs, sổ nháp | — |
+| `services/state.js` | Bootstrap, lưu profile/todos/schedule | — |
+| `services/focus.js` | Credit chống gian lận + cộng giờ học | — |
+| `services/shop.js` | Cửa hàng avatar/frame | — |
+| `services/garden.js` | Vườn, thẻ hồ sơ thành viên, thống kê | — |
 | `util.js` | Hằng số & helper dùng chung (ROOM_TYPES, GARDEN_COSTS, cleanText…) | không I/O |
 | `db.js` | Pool Postgres + migration bảng | — |
 | `kv.js` | Redis: session, rate-limit, focus-credit | TTL mọi key |
@@ -32,7 +39,9 @@ Luồng request: `index.js` (xác thực qua Redis `swm:sess:*`) → `service.js
 | `data.js` | **Nguồn sự thật client**: state, gọi API, persist profile/todos/schedule |
 | `ui.js` | Bootstrap, toast, modal, icons, đăng nhập/đăng ký |
 | `shell.js` | Sidebar + topbar dùng chung mọi trang |
-| `room.js` | Trang phòng: timer, chat, docs, thành viên, mục tiêu, heartbeat |
+| `room.js` | Orchestrator trang phòng: timer, goals, heartbeat, SSE, poll |
+| `room-picker.js` | Form mở phòng cá nhân + bảng chọn "Phòng đang mở" (`window.RoomPicker`) |
+| `room-membercard.js` | Thẻ hồ sơ thành viên khi bấm avatar (`window.MemberCard`) |
 | `dashboard.js` / `myroom.js` / `planner.js` / `stats.js` / `profile.js` / `garden.js` / `music.js` / `landing.js` | Mỗi trang một module, IIFE độc lập |
 
 Luồng dữ liệu: trang tải → `bootstrap` (state ban đầu) → render →
@@ -70,9 +79,13 @@ docker compose up -d --build backend frontend   # server + frontend
 Frontend đổi HTML/CSS/JS chỉ cần build frontend + refresh (đã có cache-busting).
 Server đổi bắt buộc build backend (SSE sẽ tự nối lại sau ~10–20s).
 
-## 7. Lộ trình mở rộng (khi cần)
+## 7. Đã tách & lộ trình tiếp theo
 
-- Tách `service.js` theo domain (rooms / focus / garden / profile) khi vượt ~2k dòng.
-- Tách `room.js` thành module nhỏ (timer / chat / docs / members) — cần thiết lập
-  window-level namespace trước, mỗi module một file IIFE.
-- Đưa presence sang Redis pub/sub nếu sau này chạy nhiều instance backend.
+- ✅ `service.js` → facade + `services/` 7 domain module (auth, rooms, state,
+  focus, shop, garden, shared) — index.js không đổi.
+- ✅ `room.js` → `room-picker.js` + `room-membercard.js` tách qua facade
+  `window.RoomPicker` / `window.MemberCard`.
+- ✅ CSS chết được quét & gỡ định kỳ (kiểm tra class token + class compose động).
+- Tiếp: nếu `room.js`/`rooms.js` lớn thêm, tách timer và chat thành module với
+  window-facade như trên — không big-bang.
+- Đưa presence sang Redis pub/sub nếu chạy nhiều instance backend.
