@@ -2182,7 +2182,8 @@ body.app-body-page {
 }
 
 @media (max-width: 720px) {
-  .members-toggle { display: none; }
+  /* Giữ nút "Thành viên" trên điện thoại — không có nó thì danh sách thành
+     viên không cách nào mở được (cột members mặc định ẩn dưới 1080px). */
   .page-head { align-items: flex-start; flex-direction: column; }
   .page-head-actions { width: 100%; }
   .page-head-actions .btn { flex: 1; }
