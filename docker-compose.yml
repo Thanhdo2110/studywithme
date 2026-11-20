@@ -88,7 +88,8 @@ services:
       dockerfile: Dockerfile.frontend
     container_name: swm-frontend
     ports:
-      - "3000:80"
+      # 3000 chỉ loopback (dev/quản trị); người dùng thật đi qua 443 (Cloudflare)
+      - "127.0.0.1:3000:80"
       # Cloudflare Full (strict): CF kết nối HTTPS tới origin
       - "443:443"
     volumes:
