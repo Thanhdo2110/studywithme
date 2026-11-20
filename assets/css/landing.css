@@ -1204,7 +1204,7 @@
   .hw-timer { flex-direction: column; align-items: flex-start; }
   .hw-ring { width: 62px; height: 62px; }
   .hw-ring span { font-size: 12px; }
-  .modes-tabs button span { display: none; }
+  /* Giữ nhãn chữ trên tab — ẩn cả span làm người dùng chỉ thấy icon */
   .modes-tabs button .ico { margin: 0; }
   .footer-grid { grid-template-columns: 1fr; }
   .code-foot { font-size: 8.5px; }
