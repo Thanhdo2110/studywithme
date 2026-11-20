@@ -8,3 +8,9 @@ data
 *.log
 coverage
 screenshot*.png
+
+# Context nặng không vào image
+qa-reports
+design-system
+shot-*.png
+archive

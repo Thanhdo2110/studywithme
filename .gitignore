@@ -11,6 +11,9 @@ data/
 .env
 .env.local
 
+# Ảnh chụp màn hình dev
+shot-*.png
+
 # Công cụ & hệ điều hành
 .freebuff/
 .DS_Store
