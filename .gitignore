@@ -20,3 +20,8 @@ shot-*.png
 Thumbs.db
 *.log
 coverage/
+
+# Chứng chỉ origin (Cloudflare Origin Certificate)
+deploy/certs/
+*.pem
+*.key
