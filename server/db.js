@@ -166,6 +166,8 @@ const SCHEMA_SQL = `
     exam TEXT NOT NULL DEFAULT '',
     exam_date TEXT NOT NULL DEFAULT '',
     target_school TEXT NOT NULL DEFAULT '',
+    current_school TEXT NOT NULL DEFAULT '',
+    gender TEXT NOT NULL DEFAULT '',
     goal_hours INTEGER NOT NULL DEFAULT 4,
     accent TEXT NOT NULL DEFAULT 'green',
     theme TEXT NOT NULL DEFAULT 'light',
@@ -302,6 +304,18 @@ function createPool(config = {}) {
 }
 
 async function initDatabase(pool, { seed = true } = {}) {
+  /* Migration nhẹ: thêm cột còn thiếu vào DB tạo từ schema cũ — chạy an toàn
+     lặp lại (IF NOT EXISTS) để fresh VPS và DB cũ cùng dùng một mã. */
+  const migrations = [
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS current_school TEXT NOT NULL DEFAULT ''",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS gender TEXT NOT NULL DEFAULT ''",
+  ];
+  for (const sql of migrations) {
+    await pool.query(sql).catch((err) => {
+      console.error("[StudyWithMe] migration:", err.message);
+    });
+  }
+
   await pool.query(SCHEMA_SQL);
   if (seed) await seedGlobal(pool);
 }
