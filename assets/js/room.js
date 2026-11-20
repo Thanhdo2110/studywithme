@@ -871,9 +871,21 @@
 
     document.querySelectorAll("[data-scroll]").forEach((btn) => {
       btn.addEventListener("click", () => {
+        document.querySelectorAll("[data-scroll]").forEach((b) => b.classList.toggle("active", b === btn));
         const target = document.getElementById(btn.dataset.scroll);
         if (!target) return;
-        document.querySelectorAll("[data-scroll]").forEach((b) => b.classList.toggle("active", b === btn));
+        /* Cột thành viên trên mobile ẩn mặc định: chip phải MỞ cột trước
+           (scrollIntoView trên phần tử display:none không có tác dụng),
+           bấm lần nữa thì thu lại. */
+        if (btn.dataset.scroll === "membersCol" && target.classList.contains("room-col--members")) {
+          if (target.classList.contains("mobile-open")) {
+            target.classList.remove("mobile-open");
+          } else {
+            target.classList.add("mobile-open");
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+          return;
+        }
         target.scrollIntoView({ behavior: "smooth", block: "start" });
       });
     });

@@ -2182,8 +2182,9 @@ body.app-body-page {
 }
 
 @media (max-width: 720px) {
-  /* Giữ nút "Thành viên" trên điện thoại — không có nó thì danh sách thành
-     viên không cách nào mở được (cột members mặc định ẩn dưới 1080px). */
+  /* Trên điện thoại chip "Thành viên" của .mobile-room-tabs điều khiển cột
+     thành viên — ẩn nút trùng ở room-top-actions. 720–1080px vẫn dùng nút. */
+  .members-toggle { display: none; }
   .page-head { align-items: flex-start; flex-direction: column; }
   .page-head-actions { width: 100%; }
   .page-head-actions .btn { flex: 1; }
