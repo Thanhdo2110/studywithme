@@ -2147,7 +2147,13 @@ body.app-body-page {
   .members-toggle { display: inline-flex; }
   .room-grid { grid-template-columns: minmax(0, 1fr) 316px; }
   .room-grid > .room-col--members { display: none; }
-  .room-grid > .room-col--members.mobile-open { display: flex; grid-column: 1 / -1; }
+  .room-grid > .room-col--members.mobile-open {
+    display: flex;
+    grid-column: 1 / -1;
+    /* Không kéo trọn ngang — thẻ thành viên giữ tỷ lệ đẹp, chừa khoảng
+       thở bên phải */
+    max-width: 380px;
+  }
   .room-grid > .room-col--main { order: 1; }
   .room-grid > .room-col--chat { order: 2; }
   .room-col--sticky { position: static; }
@@ -2178,7 +2184,10 @@ body.app-body-page {
   .exam-dday { padding-right: 16px; }
   .dash-rail { grid-template-columns: 1fr; }
   .room-grid > .room-col--members { display: none; }
-  .room-grid > .room-col--members.mobile-open { display: flex; }
+  .room-grid > .room-col--members.mobile-open {
+    display: flex;
+    max-width: 380px;
+  }
 }
 
 @media (max-width: 720px) {

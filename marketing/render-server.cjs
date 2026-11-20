@@ -41,7 +41,9 @@ const server = http.createServer((req, res) => {
     const chunks = [];
     req.on("data", (c) => chunks.push(c));
     req.on("end", () => {
-      const buf = Buffer.concat(chunks);
+      const buf = req.headers["x-b64"]
+        ? Buffer.from(Buffer.concat(chunks).toString("utf8"), "base64")
+        : Buffer.concat(chunks);
       fs.mkdirSync(path.dirname(target), { recursive: true });
       fs.writeFileSync(target, buf);
       if (!url.searchParams.get("quiet")) {
