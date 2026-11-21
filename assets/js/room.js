@@ -224,26 +224,14 @@
 
     wrap.innerHTML = todos
       .map((t) => {
-        const s = subOf(t.subject);
-        /* Màu tag theo môn: cùng môn → cùng màu (nhất quán giữa các lần xem),
-           khác môn → khác màu. FNV-1a khuếch tán mạnh, tránh tình trạng
-           hash cộng-mã-ký tự cho các giá trị gần nhau cùng một tông màu. */
-        const fnv = (str) => {
-          let h = 2166136261;
-          for (const c of String(str)) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; }
-          return h;
-        };
-        const hue = fnv(t.subject || t.text) % 360;
-        const tagColor = `hsl(${hue} 62% 40%)`;
-        const tagBg = `hsl(${hue} 70% 95%)`;
+        const s = D.subOf(t.subject);
         return `<div class="goal">
           <label class="check">
             <input type="checkbox" data-goal="${t.id}" ${t.done ? "checked" : ""}>
             <span class="box"></span>
             <span class="check-text">${escapeHTML(t.text)}</span>
           </label>
-          ${s.name ? `<span class="tag" style="color:${tagColor};border-color:${tagColor}55;background:${tagBg}">${escapeHTML(s.name)}</span>` : ""}
-
+          <span class="tag" style="color:${s.color};border-color:${s.color}44">${escapeHTML(s.name)}</span>
         </div>`;
       })
       .join("");

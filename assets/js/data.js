@@ -34,6 +34,15 @@
 
   const SUBJECT_MAP = SUBJECTS.reduce((acc, s) => ((acc[s.id] = s), acc), {});
 
+  /* Nguồn sự thật MỘT cho tag môn học — planner và phòng học cùng dùng.
+     custom:<tên> → tên người nhập; id lạ → "Khác"; màu từ palette theo theme. */
+  const subOf = (id) => {
+    if (typeof id === "string" && id.startsWith("custom:")) {
+      return { name: id.slice(7), color: "#959590" };
+    }
+    return SUBJECT_MAP[id] || { name: "Khác", color: "#959590" };
+  };
+
   const pad = (n) => String(n).padStart(2, "0");
   const iso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
   const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
@@ -374,6 +383,18 @@
     if (window.Shell) window.Shell.refresh();
   }
 
+  /* Tab khác vừa lưu → nhậntodos/schedule mới và phát swm:data-synced
+     để trang đang mở vẽ lại (planner: todos + timeline; room: goals). */
+  window.addEventListener("storage", (e) => {
+    if (e.key !== "studywithme.sync" || !e.newValue) return;
+    try {
+      const sync = JSON.parse(e.newValue);
+      if (Array.isArray(sync.todos)) state.todos = sync.todos;
+      if (Array.isArray(sync.schedule)) state.schedule = sync.schedule;
+      document.dispatchEvent(new CustomEvent("swm:data-synced"));
+    } catch (err) { /* dữ liệu hỏng — bỏ qua */ }
+  });
+
   const Store = {
     state,
     account,
@@ -417,6 +438,14 @@
           .then((saved) => {
             Object.assign(notebookSnapshot, notebooks);
             if (target === pendingVersion) applySaved(saved);
+            /* Báo cho các tab khác cùng tài khoản: todos/schedule vừa đổi. */
+            try {
+              localStorage.setItem("studywithme.sync", JSON.stringify({
+                todos: state.todos,
+                schedule: state.schedule,
+                at: Date.now(),
+              }));
+            } catch (err) { /* localStorage bị chặn — bỏ qua */ }
           })
           .catch(reportError);
       };
@@ -686,6 +715,7 @@
     DAY,
     SUBJECTS,
     SUBJECT_MAP,
+    subOf,
     MEMBER_POOL,
     DEFAULT_ROOMS,
     DEFAULT_DOCS,

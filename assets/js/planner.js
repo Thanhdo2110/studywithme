@@ -13,12 +13,7 @@
   let weekOffset = 0;
   let selectedBlockId = null;
 
-  const subOf = (id) => {
-    if (typeof id === "string" && id.startsWith("custom:")) {
-      return { name: id.slice(7), color: "#959590" };
-    }
-    return D.SUBJECT_MAP[id] || { name: "Khác", color: "#959590" };
-  };
+  const subOf = (id) => D.subOf(id); /* chuẩn hoá: cùng một nguồn với phòng học */
 
   function subjectValue(value) {
     const name = value.trim();
@@ -210,6 +205,12 @@
       });
     });
   }
+
+  document.addEventListener("swm:data-synced", () => {
+    renderTodos();
+    renderSummary();
+    renderTimeline();
+  });
 
   function renderAll() {
     renderTimeline();
