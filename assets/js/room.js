@@ -225,10 +225,15 @@
     wrap.innerHTML = todos
       .map((t) => {
         const s = subOf(t.subject);
-        /* Màu tag: mỗi mục tiêu một màu riêng — băm từ id để ổn định giữa các
-           lần render (không "nhảy màu" khi load lại), nhưng các tag khác nhau
-           thì khác màu, nổi bật hơn bảng mono tĩnh. */
-        const hue = hash(t.id || t.text) % 360;
+        /* Màu tag theo môn: cùng môn → cùng màu (nhất quán giữa các lần xem),
+           khác môn → khác màu. FNV-1a khuếch tán mạnh, tránh tình trạng
+           hash cộng-mã-ký tự cho các giá trị gần nhau cùng một tông màu. */
+        const fnv = (str) => {
+          let h = 2166136261;
+          for (const c of String(str)) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; }
+          return h;
+        };
+        const hue = fnv(t.subject || t.text) % 360;
         const tagColor = `hsl(${hue} 62% 40%)`;
         const tagBg = `hsl(${hue} 70% 95%)`;
         return `<div class="goal">
