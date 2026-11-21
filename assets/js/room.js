@@ -841,26 +841,28 @@
     document.getElementById("inviteBtn").addEventListener("click", invite);
     document.getElementById("copyInvite").addEventListener("click", invite);
 
-    /* Danh sách môn giống Kế hoạch học (planner) — nguồn D.SUBJECTS. */
+    /* Môn gõ tay — ánh xạ y như Kế hoạch học: tên quen → id chuẩn, tên lạ →
+       custom:<tên> (vẫn có tag màu riêng nhờ hash theo môn). */
     const goalSubject = document.getElementById("goalSubject");
-    (D.SUBJECTS || []).forEach((s) => {
-      const opt = document.createElement("option");
-      opt.value = s.id;
-      opt.textContent = s.name;
-      goalSubject.appendChild(opt);
-    });
+    const goalSubjectValue = () => {
+      const name = goalSubject.value.trim();
+      if (!name) return "";
+      const known = (D.SUBJECTS || []).find((s) => s.name.toLowerCase() === name.toLowerCase());
+      return known ? known.id : `custom:${name}`;
+    };
 
     document.getElementById("goalForm").addEventListener("submit", (e) => {
       e.preventDefault();
       const input = document.getElementById("goalInput");
       const text = input.value.trim();
       if (!text) return;
+      const subject = goalSubjectValue() || room.subject;
       Store.update((s) => {
-        s.todos.push({ id: `t-${Date.now()}`, text, subject: goalSubject.value || room.subject, done: false });
+        s.todos.push({ id: `t-${Date.now()}`, text, subject, done: false });
       });
       input.value = "";
       renderGoals();
-      toast(goalSubject.value ? `Đã thêm mục tiêu môn ${goalSubject.options[goalSubject.selectedIndex].text}.` : "Đã thêm mục tiêu cho buổi học.");
+      toast(goalSubject.value.trim() ? `Đã thêm mục tiêu môn ${goalSubject.value.trim()}.` : "Đã thêm mục tiêu cho buổi học.");
     });
 
     document.getElementById("membersToggle").addEventListener("click", () => {
