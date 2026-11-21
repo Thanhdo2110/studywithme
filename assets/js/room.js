@@ -215,7 +215,7 @@
 
   function renderGoals() {
     const wrap = document.getElementById("goalsList");
-    const todos = [...Store.state.todos].sort((a, b) => Number(a.done) - Number(b.done)).slice(0, 6);
+    const todos = [...Store.state.todos].sort((a, b) => Number(a.done) - Number(b.done));
 
     if (!todos.length) {
       wrap.innerHTML = `<div class="todo-empty">Chưa có mục tiêu. Thêm một việc nhỏ bên dưới.</div>`;
