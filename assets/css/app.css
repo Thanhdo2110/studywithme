@@ -882,15 +882,13 @@ body.app-body-page {
 .goal:hover { background: color-mix(in srgb, var(--text) 3%, transparent); }
 .goal .check-text { font-size: 12px; line-height: 1.5; }
 .goal .tag { margin-left: auto; flex: none; height: 17px; font-size: 8.5px; padding: 0 5px; }
-.goal-add { display: flex; flex-direction: column; gap: 7px; padding: 9px 12px 12px; border-top: 1px solid var(--border); }
+.goal-add { display: flex; gap: 7px; padding: 9px 12px 12px; border-top: 1px solid var(--border); }
 .goal-add .input { height: 34px; font-size: 12px; }
-.goal-add .btn { height: 34px; padding: 0 11px; font-size: 12px; }
-.goal-add .goal-task { width: 100%; }
-.goal-add-row { display: flex; gap: 7px; }
-.goal-add .goal-subject { width: 132px; flex: none; }
-.goal-add-row .btn { margin-left: auto; }
+.goal-add .btn { height: 34px; padding: 0 11px; font-size: 12px; flex: none; }
+.goal-add .goal-subject { width: 118px; flex: none; }
+.goal-add .goal-task { flex: 1; min-width: 0; }
 @media (max-width: 720px) {
-  .goal-add .goal-subject { width: 110px; }
+  .goal-add .goal-subject { width: 96px; }
 }
 
 .doc-list { display: flex; flex-direction: column; }
