@@ -841,17 +841,26 @@
     document.getElementById("inviteBtn").addEventListener("click", invite);
     document.getElementById("copyInvite").addEventListener("click", invite);
 
+    /* Danh sách môn giống Kế hoạch học (planner) — nguồn D.SUBJECTS. */
+    const goalSubject = document.getElementById("goalSubject");
+    (D.SUBJECTS || []).forEach((s) => {
+      const opt = document.createElement("option");
+      opt.value = s.id;
+      opt.textContent = s.name;
+      goalSubject.appendChild(opt);
+    });
+
     document.getElementById("goalForm").addEventListener("submit", (e) => {
       e.preventDefault();
       const input = document.getElementById("goalInput");
       const text = input.value.trim();
       if (!text) return;
       Store.update((s) => {
-        s.todos.push({ id: `t-${Date.now()}`, text, subject: room.subject, done: false });
+        s.todos.push({ id: `t-${Date.now()}`, text, subject: goalSubject.value || room.subject, done: false });
       });
       input.value = "";
       renderGoals();
-      toast("Đã thêm mục tiêu cho buổi học.");
+      toast(goalSubject.value ? `Đã thêm mục tiêu môn ${goalSubject.options[goalSubject.selectedIndex].text}.` : "Đã thêm mục tiêu cho buổi học.");
     });
 
     document.getElementById("membersToggle").addEventListener("click", () => {
