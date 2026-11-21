@@ -107,8 +107,10 @@ body.app-body-page {
   background: var(--surface);
 }
 .side-user .avatar { --size: 32px; }
-.side-user b { display: block; font-size: 12.3px; font-weight: 500; line-height: 1.3; }
-.side-user span { display: block; font-size: 10.5px; color: var(--text-3); }
+.side-user .grow b { display: block; font-size: 12.3px; font-weight: 500; line-height: 1.3; }
+/* Chỉ nhắm dòng phụ — selector ".side-user span" tràn cả avatar (span) làm
+   emoji lệch góc trên trái với cỡ 10.5px. */
+.side-user .grow span { display: block; font-size: 10.5px; color: var(--text-3); }
 .side-user .ico-btn { margin-left: auto; color: var(--text-3); width: 26px; height: 26px; display: grid; place-items: center; border-radius: 6px; }
 .side-user .ico-btn:hover { background: color-mix(in srgb, var(--text) 6%, transparent); color: var(--text); }
 
