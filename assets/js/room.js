@@ -225,13 +225,19 @@
     wrap.innerHTML = todos
       .map((t) => {
         const s = subOf(t.subject);
+        /* Màu tag: mỗi mục tiêu một màu riêng — băm từ id để ổn định giữa các
+           lần render (không "nhảy màu" khi load lại), nhưng các tag khác nhau
+           thì khác màu, nổi bật hơn bảng mono tĩnh. */
+        const hue = hash(t.id || t.text) % 360;
+        const tagColor = `hsl(${hue} 62% 40%)`;
+        const tagBg = `hsl(${hue} 70% 95%)`;
         return `<div class="goal">
           <label class="check">
             <input type="checkbox" data-goal="${t.id}" ${t.done ? "checked" : ""}>
             <span class="box"></span>
             <span class="check-text">${escapeHTML(t.text)}</span>
           </label>
-          ${s.name ? `<span class="tag" style="color:${s.color};border-color:${s.color}44">${escapeHTML(s.name)}</span>` : ""}
+          ${s.name ? `<span class="tag" style="color:${tagColor};border-color:${tagColor}55;background:${tagBg}">${escapeHTML(s.name)}</span>` : ""}
 
         </div>`;
       })
